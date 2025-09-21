@@ -322,7 +322,7 @@
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050a1a, 0.015);
+        scene.fog = new THREE.FogExp2(0x001122, 0.008); // Deeper, more atmospheric fog
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
@@ -339,7 +339,7 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = 1.4; // Increased exposure for better underwater feel
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         // --- CAMERA CONTROLS ---
@@ -356,21 +356,39 @@
             controls.target.set(0, 0, 0); // Camera will orbit a central point
         }
 
-        // --- LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0x40a0ff, 0.8);
+        // --- ENHANCED LIGHTING ---
+        // Main underwater ambient light
+        const ambientLight = new THREE.AmbientLight(0x1a4d80, 0.6);
         scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0x80c0ff, 1.2);
-        directionalLight.position.set(5, 15, 5);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 50;
-        directionalLight.shadow.camera.left = -25;
-        directionalLight.shadow.camera.right = 25;
-        directionalLight.shadow.camera.top = 25;
-        directionalLight.shadow.camera.bottom = -25;
-        scene.add(directionalLight);
+        
+        // Sunlight from above (simulating light filtering through water)
+        const sunLight = new THREE.DirectionalLight(0x87ceeb, 2.0);
+        sunLight.position.set(0, 50, 0);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 4096;
+        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 100;
+        sunLight.shadow.camera.left = -50;
+        sunLight.shadow.camera.right = 50;
+        sunLight.shadow.camera.top = 50;
+        sunLight.shadow.camera.bottom = -50;
+        sunLight.shadow.bias = -0.0001;
+        scene.add(sunLight);
+        
+        // Caustic light effect (moving light patterns)
+        const causticLight = new THREE.PointLight(0x00ffff, 1.5, 30);
+        causticLight.position.set(0, 10, 0);
+        scene.add(causticLight);
+        
+        // Deep sea bioluminescent glow
+        const bioLight = new THREE.PointLight(0x00ff88, 0.8, 25);
+        bioLight.position.set(-15, -10, 0);
+        scene.add(bioLight);
+        
+        const bioLight2 = new THREE.PointLight(0xff4488, 0.8, 25);
+        bioLight2.position.set(15, -15, 10);
+        scene.add(bioLight2);
 
         // --- GOD RAYS (VOLUMETRIC LIGHTING EFFECT) ---
         const godraysEffect = new THREE.Group();
@@ -413,81 +431,270 @@
         }
         scene.add(godraysEffect);
 
-        // --- ENVIRONMENT ---
-        const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(200, 200),
-            new THREE.MeshLambertMaterial({ color: 0x10204a })
-        );
+        // --- ENHANCED ENVIRONMENT ---
+        // Ocean floor with gradient material
+        const floorGeometry = new THREE.PlaneGeometry(300, 300, 32, 32);
+        const floorMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x0a1a2e,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
         floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -20;
+        floor.position.y = -25;
         floor.receiveShadow = true;
         scene.add(floor);
         
-        // Add scenery
-        const rockMaterial = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
-        for (let i = 0; i < 50; i++) {
-            const radius = Math.random() * 2 + 0.5;
-            const rock = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 8), rockMaterial);
+        // Add height variation to floor
+        const floorVertices = floor.geometry.attributes.position.array;
+        for (let i = 0; i < floorVertices.length; i += 3) {
+            floorVertices[i + 2] += (Math.random() - 0.5) * 2; // Add some height variation
+        }
+        floor.geometry.attributes.position.needsUpdate = true;
+        floor.geometry.computeVertexNormals();
+        
+        // Enhanced rock formations
+        const rockMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x34495e,
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        
+        // Large rock formations
+        for (let i = 0; i < 30; i++) {
+            const radius = Math.random() * 3 + 1;
+            const rock = new THREE.Mesh(
+                new THREE.SphereGeometry(radius, 12, 8), 
+                rockMaterial
+            );
             rock.position.set(
-                (Math.random() - 0.5) * 150,
-                -20 + radius * 0.8,
-                (Math.random() - 0.5) * 150
+                (Math.random() - 0.5) * 200,
+                -25 + radius * 0.6,
+                (Math.random() - 0.5) * 200
+            );
+            rock.scale.set(
+                1 + Math.random() * 0.5,
+                0.5 + Math.random() * 0.8,
+                1 + Math.random() * 0.5
+            );
+            rock.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
             );
             rock.castShadow = true;
             rock.receiveShadow = true;
             scene.add(rock);
         }
+        
+        // Seaweed/kelp
+        const seaweedMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2d5016,
+            roughness: 0.9,
+            metalness: 0.0
+        });
+        
+        for (let i = 0; i < 40; i++) {
+            const height = Math.random() * 8 + 3;
+            const seaweed = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.3, height, 6),
+                seaweedMaterial
+            );
+            seaweed.position.set(
+                (Math.random() - 0.5) * 180,
+                -25 + height / 2,
+                (Math.random() - 0.5) * 180
+            );
+            seaweed.rotation.z = (Math.random() - 0.5) * 0.3;
+            seaweed.castShadow = true;
+            seaweed.receiveShadow = true;
+            scene.add(seaweed);
+        }
+        
+        // Coral formations
+        const coralMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff6b6b,
+            roughness: 0.7,
+            metalness: 0.1
+        });
+        
+        for (let i = 0; i < 25; i++) {
+            const coral = new THREE.Mesh(
+                new THREE.ConeGeometry(0.5 + Math.random() * 1, 2 + Math.random() * 3, 6),
+                coralMaterial
+            );
+            coral.position.set(
+                (Math.random() - 0.5) * 160,
+                -25,
+                (Math.random() - 0.5) * 160
+            );
+            coral.rotation.set(
+                (Math.random() - 0.5) * 0.5,
+                Math.random() * Math.PI * 2,
+                (Math.random() - 0.5) * 0.5
+            );
+            coral.castShadow = true;
+            coral.receiveShadow = true;
+            scene.add(coral);
+        }
 
-        // --- FISH CHARACTER ---
+        // --- ENHANCED FISH CHARACTER ---
         const fishGroup = new THREE.Group();
+        
+        // Main body with gradient material
         const fishBody = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.5, 1.5, 4, 12),
-            new THREE.MeshStandardMaterial({ color: 0xff4500, metalness: 0.3, roughness: 0.5 })
+            new THREE.CapsuleGeometry(0.6, 2.0, 4, 16),
+            new THREE.MeshStandardMaterial({ 
+                color: 0xff6b35,
+                metalness: 0.4,
+                roughness: 0.3,
+                emissive: 0x331100,
+                emissiveIntensity: 0.1
+            })
         );
         fishBody.rotation.z = Math.PI / 2;
         fishBody.castShadow = true;
         fishGroup.add(fishBody);
 
+        // Enhanced tail with better geometry
         const fishTail = new THREE.Mesh(
-            new THREE.PlaneGeometry(1, 1),
-            new THREE.MeshStandardMaterial({ color: 0xff6347 })
+            new THREE.ConeGeometry(0.8, 1.2, 6),
+            new THREE.MeshStandardMaterial({ 
+                color: 0xff8c42,
+                metalness: 0.3,
+                roughness: 0.4,
+                side: THREE.DoubleSide
+            })
         );
-        fishTail.position.x = -1.2;
-        fishTail.scale.set(0.8, 0.8, 0.8);
+        fishTail.position.x = -1.5;
+        fishTail.rotation.z = Math.PI / 2;
+        fishTail.scale.set(0.8, 1.0, 0.6);
         fishGroup.add(fishTail);
 
-        const finMaterial = new THREE.MeshStandardMaterial({ color: 0xff6347, side: THREE.DoubleSide });
-        const dorsalFin = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.7), finMaterial);
-        dorsalFin.position.set(0.2, 0.5, 0);
-        dorsalFin.rotation.z = Math.PI / 4;
+        // Enhanced fins with better materials
+        const finMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff9f43,
+            metalness: 0.2,
+            roughness: 0.5,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.9
+        });
+        
+        // Dorsal fin
+        const dorsalFin = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), finMaterial);
+        dorsalFin.position.set(0.3, 0.6, 0);
+        dorsalFin.rotation.z = Math.PI / 6;
         fishGroup.add(dorsalFin);
 
-        const sideFinL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), finMaterial);
-        sideFinL.position.set(0, -0.1, 0.5);
+        // Side fins
+        const sideFinL = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.6), finMaterial);
+        sideFinL.position.set(0.2, -0.1, 0.6);
         sideFinL.rotation.y = Math.PI / 2;
-        sideFinL.rotation.z = -Math.PI / 6;
+        sideFinL.rotation.z = -Math.PI / 8;
         fishGroup.add(sideFinL);
         
         const sideFinR = sideFinL.clone();
-        sideFinR.position.z = -0.5;
-        sideFinR.rotation.z = Math.PI / 6;
+        sideFinR.position.z = -0.6;
+        sideFinR.rotation.z = Math.PI / 8;
         fishGroup.add(sideFinR);
+        
+        // Pectoral fins
+        const pectoralFinL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), finMaterial);
+        pectoralFinL.position.set(0.5, 0.2, 0.4);
+        pectoralFinL.rotation.y = Math.PI / 2;
+        pectoralFinL.rotation.x = Math.PI / 6;
+        fishGroup.add(pectoralFinL);
+        
+        const pectoralFinR = pectoralFinL.clone();
+        pectoralFinR.position.z = -0.4;
+        pectoralFinR.rotation.x = -Math.PI / 6;
+        fishGroup.add(pectoralFinR);
+        
+        // Eyes
+        const eyeMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff,
+            metalness: 0.8,
+            roughness: 0.1
+        });
+        const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), eyeMaterial);
+        eyeL.position.set(0.8, 0.2, 0.3);
+        fishGroup.add(eyeL);
+        
+        const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), eyeMaterial);
+        eyeR.position.set(0.8, 0.2, -0.3);
+        fishGroup.add(eyeR);
+        
+        // Pupils
+        const pupilMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), pupilMaterial);
+        pupilL.position.set(0.85, 0.2, 0.3);
+        fishGroup.add(pupilL);
+        
+        const pupilR = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), pupilMaterial);
+        pupilR.position.set(0.85, 0.2, -0.3);
+        fishGroup.add(pupilR);
+        
         scene.add(fishGroup);
 
-        // --- BUBBLE PARTICLE SYSTEM ---
-        const bubbleCount = 15;
+        // --- ENHANCED BUBBLE PARTICLE SYSTEM ---
+        const bubbleCount = 50;
         const bubbleGeometry = new THREE.BufferGeometry();
         const bubblePositions = new Float32Array(bubbleCount * 3);
+        const bubbleSizes = new Float32Array(bubbleCount);
         const bubbleVelocities = [];
 
         for (let i = 0; i < bubbleCount; i++) {
-            bubbleVelocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.1, Math.random() * 0.5 + 0.1, (Math.random() - 0.5) * 0.1));
+            bubbleVelocities.push(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.15, 
+                Math.random() * 0.8 + 0.2, 
+                (Math.random() - 0.5) * 0.15
+            ));
+            bubbleSizes[i] = Math.random() * 0.4 + 0.1;
         }
         bubbleGeometry.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+        bubbleGeometry.setAttribute('size', new THREE.BufferAttribute(bubbleSizes, 1));
+        
         const bubbles = new THREE.Points(bubbleGeometry, new THREE.PointsMaterial({
-            color: 0xffffff, size: 0.3, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending
+            color: 0x87ceeb,
+            size: 0.2,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
         }));
         scene.add(bubbles);
+        
+        // Floating particles (plankton, debris)
+        const particleCount = 100;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleColors = new Float32Array(particleCount * 3);
+        
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i * 3] = (Math.random() - 0.5) * 200;
+            particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
+            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+            
+            // Random colors for plankton
+            const color = new THREE.Color();
+            color.setHSL(Math.random() * 0.3 + 0.1, 0.8, 0.6);
+            particleColors[i * 3] = color.r;
+            particleColors[i * 3 + 1] = color.g;
+            particleColors[i * 3 + 2] = color.b;
+        }
+        
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+        
+        const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
+            size: 0.05,
+            transparent: true,
+            opacity: 0.8,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending
+        }));
+        scene.add(particles);
 
         // --- PORTFOLIO ITEMS ---
         const portfolioItems = [];
@@ -542,14 +749,24 @@
             portfolioItems.push({ ...data, mesh: group });
         });
 
-        // --- MOVEMENT & CONTROL VARIABLES ---
+        // --- ENHANCED MOVEMENT & CONTROL VARIABLES ---
         const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
         const fishVelocity = new THREE.Vector3();
+        const fishAngularVelocity = new THREE.Vector3();
         let isBoosting = false;
-        const baseSpeed = 10.0;
-        const boostMultiplier = 2.5;
-        const momentumDamping = 4.0;
+        const baseSpeed = 8.0;
+        const boostMultiplier = 2.8;
+        const momentumDamping = 3.5;
+        const angularDamping = 2.0;
         const cameraOffset = new THREE.Vector3(0, 4, 12);
+        const cameraSmoothing = 0.1;
+        
+        // Enhanced movement physics
+        let currentSpeed = 0;
+        let targetSpeed = 0;
+        const maxSpeed = 15.0;
+        const acceleration = 8.0;
+        const deceleration = 12.0;
         
         let lastTouchX = null;
         let lastTouchY = null;
@@ -687,66 +904,135 @@
         const portfolioLink = document.getElementById('portfolio-link');
         let activePortfolioItem = null;
 
-        // --- ANIMATION LOOP ---
+        // --- ENHANCED ANIMATION LOOP ---
         const clock = new THREE.Clock();
         function animate() {
             requestAnimationFrame(animate);
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
-            // --- Fish Movement & Rotation ---
-            const currentSpeed = (isBoosting ? baseSpeed * boostMultiplier : baseSpeed);
+            // --- Enhanced Fish Movement & Physics ---
+            const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
+            targetSpeed = Math.abs(moveState.forward) * baseSpeed * speedMultiplier;
             
-            // Rotation is now handled by the 'turn' and 'up' states
-            fishGroup.rotation.y += moveState.turn * 0.05;
-            fishGroup.rotation.x -= moveState.up * 0.02;
+            // Smooth speed transitions
+            if (targetSpeed > currentSpeed) {
+                currentSpeed = Math.min(currentSpeed + acceleration * deltaTime, targetSpeed);
+            } else {
+                currentSpeed = Math.max(currentSpeed - deceleration * deltaTime, targetSpeed);
+            }
+            
+            // Enhanced rotation with angular velocity
+            const turnSpeed = 0.08 * speedMultiplier;
+            const pitchSpeed = 0.04 * speedMultiplier;
+            
+            fishAngularVelocity.y = moveState.turn * turnSpeed;
+            fishAngularVelocity.x = -moveState.up * pitchSpeed;
+            
+            fishGroup.rotation.y += fishAngularVelocity.y * deltaTime;
+            fishGroup.rotation.x += fishAngularVelocity.x * deltaTime;
+            
+            // Apply angular damping
+            fishAngularVelocity.multiplyScalar(1 - angularDamping * deltaTime);
 
             // Constrain fish's vertical rotation to avoid flipping
-            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
+            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 3, Math.PI / 3);
 
+            // Enhanced movement with momentum
             const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(fishGroup.quaternion);
             const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(fishGroup.quaternion);
+            const upVector = new THREE.Vector3(0, 1, 0);
 
             const targetVelocity = forwardVector.multiplyScalar(currentSpeed * moveState.forward);
-            targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe));
-            
-            // Add vertical speed directly to the target velocity
-            targetVelocity.y += moveState.up * currentSpeed * 0.5;
+            targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe * 0.7));
+            targetVelocity.add(upVector.multiplyScalar(moveState.up * currentSpeed * 0.6));
 
             fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
             fishGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
 
-            // Animate fins and tail
-            const wiggleSpeed = isBoosting ? 20 : 10;
-            fishTail.rotation.y = Math.sin(elapsedTime * wiggleSpeed) * 0.5;
-            sideFinL.rotation.x = Math.sin(elapsedTime * 5) * 0.25;
-            sideFinR.rotation.x = Math.sin(elapsedTime * 5) * 0.25;
+            // Enhanced fin and tail animation
+            const movementIntensity = Math.min(fishVelocity.length() / 5, 1);
+            const wiggleSpeed = (isBoosting ? 25 : 12) * (0.5 + movementIntensity);
+            const wiggleAmplitude = 0.3 + movementIntensity * 0.4;
             
-            // --- Bubble Animation ---
+            fishTail.rotation.y = Math.sin(elapsedTime * wiggleSpeed) * wiggleAmplitude;
+            fishTail.rotation.z = Math.sin(elapsedTime * wiggleSpeed * 0.7) * wiggleAmplitude * 0.3;
+            
+            // Side fin animation
+            const sideFinSpeed = wiggleSpeed * 0.8;
+            sideFinL.rotation.x = Math.sin(elapsedTime * sideFinSpeed) * 0.3;
+            sideFinR.rotation.x = Math.sin(elapsedTime * sideFinSpeed + Math.PI) * 0.3;
+            
+            // Pectoral fin animation
+            pectoralFinL.rotation.x = Math.sin(elapsedTime * sideFinSpeed * 1.2) * 0.2;
+            pectoralFinR.rotation.x = Math.sin(elapsedTime * sideFinSpeed * 1.2 + Math.PI) * 0.2;
+            
+            // Dorsal fin animation
+            dorsalFin.rotation.z = Math.sin(elapsedTime * wiggleSpeed * 0.5) * 0.15;
+            
+            // --- Enhanced Bubble Animation ---
             const positions = bubbles.geometry.attributes.position.array;
+            const sizes = bubbles.geometry.attributes.size.array;
+            
             for (let i = 0; i < bubbleCount; i++) {
-                positions[i * 3 + 1] += bubbleVelocities[i].y * (isBoosting ? 2.5 : 1);
-                if (positions[i * 3 + 1] > fishGroup.position.y + 10) {
-                    if (Math.abs(fishVelocity.length()) > 1) { // Only emit bubbles when moving
-                        positions[i * 3] = fishGroup.position.x + (Math.random() - 0.5);
-                        positions[i * 3 + 1] = fishGroup.position.y;
-                        positions[i * 3 + 2] = fishGroup.position.z + (Math.random() - 0.5);
+                // Enhanced bubble movement with drift
+                positions[i * 3] += bubbleVelocities[i].x * deltaTime * 2;
+                positions[i * 3 + 1] += bubbleVelocities[i].y * (isBoosting ? 3.0 : 1.5);
+                positions[i * 3 + 2] += bubbleVelocities[i].z * deltaTime * 2;
+                
+                // Bubble size variation
+                sizes[i] = 0.1 + Math.sin(elapsedTime * 2 + i) * 0.1;
+                
+                // Reset bubbles that have risen too high
+                if (positions[i * 3 + 1] > fishGroup.position.y + 15) {
+                    if (Math.abs(fishVelocity.length()) > 0.5) { // Emit bubbles when moving
+                        positions[i * 3] = fishGroup.position.x + (Math.random() - 0.5) * 2;
+                        positions[i * 3 + 1] = fishGroup.position.y - 1;
+                        positions[i * 3 + 2] = fishGroup.position.z + (Math.random() - 0.5) * 2;
+                        
+                        // Update velocity based on fish movement
+                        bubbleVelocities[i].x = (Math.random() - 0.5) * 0.2;
+                        bubbleVelocities[i].y = Math.random() * 0.8 + 0.3;
+                        bubbleVelocities[i].z = (Math.random() - 0.5) * 0.2;
                     }
                 }
             }
             bubbles.geometry.attributes.position.needsUpdate = true;
+            bubbles.geometry.attributes.size.needsUpdate = true;
+            
+            // --- Floating Particles Animation ---
+            const particlePositions = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                // Gentle floating motion
+                particlePositions[i * 3 + 1] += Math.sin(elapsedTime * 0.5 + i * 0.1) * 0.01;
+                particlePositions[i * 3] += Math.cos(elapsedTime * 0.3 + i * 0.05) * 0.005;
+                particlePositions[i * 3 + 2] += Math.sin(elapsedTime * 0.4 + i * 0.08) * 0.005;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
 
-            // --- Portfolio Item Animation ---
+            // --- Enhanced Portfolio Item Animation ---
             portfolioItems.forEach(item => {
-                item.mesh.rotation.y += deltaTime * 0.1;
-                item.mesh.position.y = item.pos.y + Math.sin(elapsedTime + item.pos.x) * 0.5;
+                item.mesh.rotation.y += deltaTime * 0.15;
+                item.mesh.position.y = item.pos.y + Math.sin(elapsedTime * 0.8 + item.pos.x * 0.1) * 0.8;
+                item.mesh.rotation.x = Math.sin(elapsedTime * 0.5 + item.pos.z * 0.1) * 0.1;
+                
                 if(item.light){
-                    item.light.intensity = 2 + Math.sin(elapsedTime * 2) * 0.5;
+                    item.light.intensity = 2 + Math.sin(elapsedTime * 1.5) * 0.8;
+                    item.light.color.setHSL(0.6 + Math.sin(elapsedTime * 0.3) * 0.1, 0.8, 0.6);
                 }
             });
             
-            // --- God Rays Animation ---
-            godraysEffect.rotation.y += deltaTime * 0.02;
+            // --- Enhanced God Rays Animation ---
+            godraysEffect.rotation.y += deltaTime * 0.03;
+            godraysEffect.rotation.x = Math.sin(elapsedTime * 0.1) * 0.1;
+            
+            // --- Dynamic Lighting Animation ---
+            causticLight.position.x = Math.sin(elapsedTime * 0.5) * 10;
+            causticLight.position.z = Math.cos(elapsedTime * 0.3) * 8;
+            causticLight.intensity = 1.5 + Math.sin(elapsedTime * 2) * 0.5;
+            
+            bioLight.intensity = 0.8 + Math.sin(elapsedTime * 1.2) * 0.4;
+            bioLight2.intensity = 0.8 + Math.sin(elapsedTime * 1.2 + Math.PI) * 0.4;
 
             // --- Camera Follow Logic ---
             if (!isMobile) {
