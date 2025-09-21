@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gamefolio - Underwater Portfolio</title>
+    <meta name="description" content="Navigate an immersive 3D underwater world to explore Terence Richardson's portfolio projects and skills">
+    <meta name="keywords" content="portfolio, 3D, underwater, Three.js, interactive, developer, Terence Richardson">
+    <meta name="author" content="Terence Richardson">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gamefolio.vercel.app/">
+    <meta property="og:title" content="Gamefolio - Underwater Portfolio">
+    <meta property="og:description" content="Navigate an immersive 3D underwater world to explore Terence Richardson's portfolio projects and skills">
+    <meta property="og:image" content="https://gamefolio.vercel.app/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://gamefolio.vercel.app/">
+    <meta property="twitter:title" content="Gamefolio - Underwater Portfolio">
+    <meta property="twitter:description" content="Navigate an immersive 3D underwater world to explore Terence Richardson's portfolio projects and skills">
+    <meta property="twitter:image" content="https://gamefolio.vercel.app/og-image.png">
+
+    <!-- Preconnect to CDNs for performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    <style>
+        /* Basic Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background-color: #050a1a; /* Deep blue background */
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            touch-action: none; /* Prevents default browser gestures like pull-to-refresh */
+        }
+
+        /* Three.js Canvas */
+        #bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+        }
+
+        /* UI Elements */
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicks to pass through to the canvas */
+            z-index: 10;
+        }
+        
+        /* Mobile Controls */
+        #mobile-controls {
+            display: none; /* Hidden on desktop */
+            pointer-events: auto; /* Re-enable pointer events for controls */
+        }
+        
+        #joystick-container {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            width: 120px;
+            height: 120px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #joystick-thumb {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+        }
+
+        #boost-button {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            width: 80px;
+            height: 80px;
+            background-color: rgba(220, 53, 69, 0.5); /* Crimson accent */
+            border-radius: 50%;
+            border: 2px solid rgba(220, 53, 69, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            user-select: none;
+            transition: transform 0.1s ease, background-color 0.1s ease;
+        }
+        #boost-button:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 80, 95, 0.7);
+        }
+
+        #depth-controls {
+            position: absolute;
+            right: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .depth-button {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.1s ease;
+        }
+
+        .depth-button:active {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Instruction / Portfolio Pop-up */
+        .info-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 25, 47, 0.85);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 90%;
+            width: 350px;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: auto;
+        }
+        
+        .info-panel.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .info-panel h2 {
+            margin-top: 0;
+            color: #e6f1ff;
+        }
+        
+        .info-panel p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .info-panel button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .info-panel button:hover {
+            background-color: #c82333;
+        }
+        
+        #portfolio-link {
+            text-decoration: none;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #050a1a 0%, #0a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #dc3545;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #e6f1ff;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        /* Show mobile controls only on touch devices */
+        @media (pointer: coarse) {
+            #mobile-controls {
+                display: block;
+            }
+        }
+
+        /* Performance optimizations */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+            .info-panel, .loading-screen {
+                transition: none;
+            }
+            .loading-spinner {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Diving into the depths...</div>
+    </div>
+
+    <canvas id="bg"></canvas>
+
+    <div class="ui-overlay">
+        
+        <div id="mobile-controls">
+            <div id="joystick-container">
+                <div id="joystick-thumb"></div>
+            </div>
+            <div id="boost-button">BOOST</div>
+            <div id="depth-controls">
+                <div id="depth-up-button" class="depth-button">▲</div>
+                <div id="depth-down-button" class="depth-button">▼</div>
+            </div>
+        </div>
+        
+        <div id="instructions-panel" class="info-panel visible">
+            <h2>Welcome to Gamefolio</h2>
+            <p><strong>Desktop:</strong> Arrow/WASD to move, <strong>R/F</strong> for depth, Spacebar to boost. Use <strong>mouse drag</strong> to rotate the camera.</p>
+            <p><strong>Mobile:</strong> Use joystick, side buttons for depth, and boost button. <strong>Touch & drag</strong> to rotate camera.</p>
+            <button id="start-button">Dive In</button>
+        </div>
+        
+        <div id="portfolio-info-panel" class="info-panel">
+            <h2 id="portfolio-title">Portfolio Section</h2>
+            <p id="portfolio-description">This is where the project description will go.</p>
+            <a id="portfolio-link" href="#" target="_blank" rel="noopener noreferrer">
+                <button>Visit Project</button>
+            </a>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- SCENE SETUP ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050a1a, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 15);
+
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg'),
+            antialias: true,
+            powerPreference: 'high-performance',
+            alpha: false,
+            preserveDrawingBuffer: false
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Cap pixel ratio for performance
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        // --- CAMERA CONTROLS ---
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        let controls;
+        if (!isMobile) {
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.rotateSpeed = 0.5;
+            controls.enablePan = false;
+            controls.minDistance = 5;
+            controls.maxDistance = 20;
+            controls.target.set(0, 0, 0); // Camera will orbit a central point
+        }
+
+        // --- LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0x40a0ff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0x80c0ff, 1.2);
+        directionalLight.position.set(5, 15, 5);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 50;
+        directionalLight.shadow.camera.left = -25;
+        directionalLight.shadow.camera.right = 25;
+        directionalLight.shadow.camera.top = 25;
+        directionalLight.shadow.camera.bottom = -25;
+        scene.add(directionalLight);
+
+        // --- GOD RAYS (VOLUMETRIC LIGHTING EFFECT) ---
+        const godraysEffect = new THREE.Group();
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Create a simple procedural texture for god rays
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        
+        const godrayTexture = new THREE.CanvasTexture(canvas);
+        godrayTexture.wrapS = THREE.RepeatWrapping;
+        godrayTexture.wrapT = THREE.RepeatWrapping;
+        
+        const godrayMaterial = new THREE.MeshBasicMaterial({
+            map: godrayTexture,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            depthWrite: false,
+            opacity: 0.15
+        });
+
+        for (let i = 0; i < 5; i++) {
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(150, 150), godrayMaterial);
+            plane.position.set(
+                (Math.random() - 0.5) * 50,
+                20,
+                (Math.random() - 0.5) * 50
+            );
+            plane.rotation.x = -Math.PI / 2;
+            plane.rotation.z = Math.random() * Math.PI;
+            godraysEffect.add(plane);
+        }
+        scene.add(godraysEffect);
+
+        // --- ENVIRONMENT ---
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(200, 200),
+            new THREE.MeshLambertMaterial({ color: 0x10204a })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -20;
+        floor.receiveShadow = true;
+        scene.add(floor);
+        
+        // Add scenery
+        const rockMaterial = new THREE.MeshLambertMaterial({ color: 0x2c3e50 });
+        for (let i = 0; i < 50; i++) {
+            const radius = Math.random() * 2 + 0.5;
+            const rock = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 8), rockMaterial);
+            rock.position.set(
+                (Math.random() - 0.5) * 150,
+                -20 + radius * 0.8,
+                (Math.random() - 0.5) * 150
+            );
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            scene.add(rock);
+        }
+
+        // --- FISH CHARACTER ---
+        const fishGroup = new THREE.Group();
+        const fishBody = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.5, 1.5, 4, 12),
+            new THREE.MeshStandardMaterial({ color: 0xff4500, metalness: 0.3, roughness: 0.5 })
+        );
+        fishBody.rotation.z = Math.PI / 2;
+        fishBody.castShadow = true;
+        fishGroup.add(fishBody);
+
+        const fishTail = new THREE.Mesh(
+            new THREE.PlaneGeometry(1, 1),
+            new THREE.MeshStandardMaterial({ color: 0xff6347 })
+        );
+        fishTail.position.x = -1.2;
+        fishTail.scale.set(0.8, 0.8, 0.8);
+        fishGroup.add(fishTail);
+
+        const finMaterial = new THREE.MeshStandardMaterial({ color: 0xff6347, side: THREE.DoubleSide });
+        const dorsalFin = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.7), finMaterial);
+        dorsalFin.position.set(0.2, 0.5, 0);
+        dorsalFin.rotation.z = Math.PI / 4;
+        fishGroup.add(dorsalFin);
+
+        const sideFinL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), finMaterial);
+        sideFinL.position.set(0, -0.1, 0.5);
+        sideFinL.rotation.y = Math.PI / 2;
+        sideFinL.rotation.z = -Math.PI / 6;
+        fishGroup.add(sideFinL);
+        
+        const sideFinR = sideFinL.clone();
+        sideFinR.position.z = -0.5;
+        sideFinR.rotation.z = Math.PI / 6;
+        fishGroup.add(sideFinR);
+        scene.add(fishGroup);
+
+        // --- BUBBLE PARTICLE SYSTEM ---
+        const bubbleCount = 15;
+        const bubbleGeometry = new THREE.BufferGeometry();
+        const bubblePositions = new Float32Array(bubbleCount * 3);
+        const bubbleVelocities = [];
+
+        for (let i = 0; i < bubbleCount; i++) {
+            bubbleVelocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.1, Math.random() * 0.5 + 0.1, (Math.random() - 0.5) * 0.1));
+        }
+        bubbleGeometry.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+        const bubbles = new THREE.Points(bubbleGeometry, new THREE.PointsMaterial({
+            color: 0xffffff, size: 0.3, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending
+        }));
+        scene.add(bubbles);
+
+        // --- PORTFOLIO ITEMS ---
+        const portfolioItems = [];
+        const portfolioItemData = [
+             { type: 'crystal', pos: new THREE.Vector3(-20, -5, 0), color: 0x00ffff, title: "Portfolio Website", desc: "The very site you are exploring now! Built with Three.js to create an interactive experience.", link: "https://github.com/Terence-lr/Portfolio-site" },
+             { type: 'chest', pos: new THREE.Vector3(20, -18, 0), color: 0x8B4513, title: "Total Job Tracker", desc: "A full-stack application to help users track their job applications from start to finish.", link: "https://github.com/Terence-lr/total-job-tracker-" },
+             { type: 'monolith', pos: new THREE.Vector3(0, -15, -20), color: 0x778899, title: "Distance Converter", desc: "A handy utility tool for converting various units of distance, built with clean UI principles.", link: "https://github.com/Terence-lr/distance-converter" },
+             { type: 'shipwreck', pos: new THREE.Vector3(0, -18, 20), color: 0x5d4a44, title: "My GitHub Profile", desc: "Explore all my other projects and contributions. Let's connect!", link: "https://github.com/Terence-lr" },
+        ];
+        
+        portfolioItemData.forEach(data => {
+            const group = new THREE.Group();
+            const material = new THREE.MeshStandardMaterial({ color: data.color, metalness: 0.2, roughness: 0.8 });
+
+            if (data.type === 'crystal') {
+                const crystal = new THREE.Mesh(new THREE.IcosahedronGeometry(2.5, 0), material);
+                crystal.castShadow = true;
+                crystal.receiveShadow = true;
+                group.add(crystal);
+                const pointLight = new THREE.PointLight(data.color, 2, 20);
+                group.add(pointLight);
+                data.light = pointLight;
+            } else if (data.type === 'chest') {
+                const base = new THREE.Mesh(new THREE.BoxGeometry(4, 2.5, 3), material);
+                base.castShadow = true;
+                base.receiveShadow = true;
+                const lid = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 3), material);
+                lid.position.y = 2;
+                lid.rotation.x = -0.3;
+                lid.castShadow = true;
+                lid.receiveShadow = true;
+                group.add(base, lid);
+            } else if (data.type === 'monolith') {
+                const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 8, 8), material);
+                pillar.castShadow = true;
+                pillar.receiveShadow = true;
+                group.add(pillar);
+            } else if (data.type === 'shipwreck') {
+                const plank1 = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 0.5), material);
+                plank1.rotation.z = 0.8;
+                plank1.castShadow = true;
+                plank1.receiveShadow = true;
+                const plank2 = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 0.5), material);
+                plank2.rotation.z = 0.6;
+                plank2.position.x = 1.5;
+                plank2.castShadow = true;
+                plank2.receiveShadow = true;
+                group.add(plank1, plank2);
+            }
+            group.position.copy(data.pos);
+            scene.add(group);
+            portfolioItems.push({ ...data, mesh: group });
+        });
+
+        // --- MOVEMENT & CONTROL VARIABLES ---
+        const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
+        const fishVelocity = new THREE.Vector3();
+        let isBoosting = false;
+        const baseSpeed = 10.0;
+        const boostMultiplier = 2.5;
+        const momentumDamping = 4.0;
+        const cameraOffset = new THREE.Vector3(0, 4, 12);
+        
+        let lastTouchX = null;
+        let lastTouchY = null;
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystickThumb = document.getElementById('joystick-thumb');
+
+        // --- DESKTOP CONTROLS ---
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW' || e.code === 'ArrowUp') moveState.forward = 1;
+            if (e.code === 'KeyS' || e.code === 'ArrowDown') moveState.forward = -1;
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') moveState.turn = 1;
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') moveState.turn = -1;
+            if (e.code === 'KeyR') moveState.up = 1;
+            if (e.code === 'KeyF') moveState.up = -1;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                isBoosting = true;
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            if (['KeyW', 'ArrowUp', 'KeyS', 'ArrowDown'].includes(e.code)) moveState.forward = 0;
+            if (['KeyA', 'ArrowLeft', 'KeyD', 'ArrowRight'].includes(e.code)) moveState.turn = 0;
+            if (['KeyR', 'KeyF'].includes(e.code)) moveState.up = 0;
+            if (e.code === 'Space') isBoosting = false;
+        });
+        
+        // --- MOBILE CONTROLS ---
+        if (isMobile) {
+            const upButton = document.getElementById('depth-up-button');
+            const downButton = document.getElementById('depth-down-button');
+            const boostButton = document.getElementById('boost-button');
+
+            // Joystick Logic
+            let isDragging = false;
+            joystickContainer.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDragging = true;
+                handleMove(e.touches[0]);
+            });
+            joystickContainer.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    handleMove(e.touches[0]);
+                }
+            });
+            joystickContainer.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDragging = false;
+                moveState.forward = 0;
+                moveState.turn = 0;
+                joystickThumb.style.transform = `translate(-50%, -50%)`;
+            });
+
+            function handleMove(touch) {
+                const rect = joystickContainer.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const maxRadius = rect.width / 2;
+
+                let deltaX = touch.clientX - centerX;
+                let deltaY = touch.clientY - centerY;
+
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                if (distance > maxRadius) {
+                    deltaX = (deltaX / distance) * maxRadius;
+                    deltaY = (deltaY / distance) * maxRadius;
+                }
+
+                joystickThumb.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                
+                // Map joystick position to movement state
+                const angle = Math.atan2(deltaY, deltaX);
+                const normalizedDistance = distance / maxRadius;
+                moveState.forward = -Math.cos(angle) * normalizedDistance;
+                moveState.strafe = Math.sin(angle) * normalizedDistance;
+            }
+
+            // Depth Controls
+            upButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveState.up = 1;
+            });
+            upButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                moveState.up = 0;
+            });
+            downButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                moveState.up = -1;
+            });
+            downButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                moveState.up = 0;
+            });
+            
+            // Boost Button
+            boostButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isBoosting = true;
+            });
+            boostButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isBoosting = false;
+            });
+
+            // Camera drag on a different touch
+            document.addEventListener('touchstart', (e) => {
+                if(e.touches.length === 1 && !isDragging) {
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                }
+            });
+            document.addEventListener('touchmove', (e) => {
+                if(e.touches.length === 1 && !isDragging) {
+                    const deltaX = e.touches[0].clientX - lastTouchX;
+                    const deltaY = e.touches[0].clientY - lastTouchY;
+                    fishGroup.rotation.y -= deltaX * 0.005;
+                    fishGroup.rotation.x += deltaY * 0.005; // Added vertical camera rotation
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                }
+            });
+            document.addEventListener('touchend', () => {
+                lastTouchX = null;
+                lastTouchY = null;
+            });
+        }
+        
+        // --- UI PANELS ---
+        const instructionsPanel = document.getElementById('instructions-panel');
+        document.getElementById('start-button').addEventListener('click', () => instructionsPanel.classList.remove('visible'));
+        const portfolioPanel = document.getElementById('portfolio-info-panel');
+        const portfolioTitle = document.getElementById('portfolio-title');
+        const portfolioDesc = document.getElementById('portfolio-description');
+        const portfolioLink = document.getElementById('portfolio-link');
+        let activePortfolioItem = null;
+
+        // --- ANIMATION LOOP ---
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const deltaTime = clock.getDelta();
+            const elapsedTime = clock.getElapsedTime();
+
+            // --- Fish Movement & Rotation ---
+            const currentSpeed = (isBoosting ? baseSpeed * boostMultiplier : baseSpeed);
+            
+            // Rotation is now handled by the 'turn' and 'up' states
+            fishGroup.rotation.y += moveState.turn * 0.05;
+            fishGroup.rotation.x -= moveState.up * 0.02;
+
+            // Constrain fish's vertical rotation to avoid flipping
+            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
+
+            const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(fishGroup.quaternion);
+            const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(fishGroup.quaternion);
+
+            const targetVelocity = forwardVector.multiplyScalar(currentSpeed * moveState.forward);
+            targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe));
+            
+            // Add vertical speed directly to the target velocity
+            targetVelocity.y += moveState.up * currentSpeed * 0.5;
+
+            fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
+            fishGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
+
+            // Animate fins and tail
+            const wiggleSpeed = isBoosting ? 20 : 10;
+            fishTail.rotation.y = Math.sin(elapsedTime * wiggleSpeed) * 0.5;
+            sideFinL.rotation.x = Math.sin(elapsedTime * 5) * 0.25;
+            sideFinR.rotation.x = Math.sin(elapsedTime * 5) * 0.25;
+            
+            // --- Bubble Animation ---
+            const positions = bubbles.geometry.attributes.position.array;
+            for (let i = 0; i < bubbleCount; i++) {
+                positions[i * 3 + 1] += bubbleVelocities[i].y * (isBoosting ? 2.5 : 1);
+                if (positions[i * 3 + 1] > fishGroup.position.y + 10) {
+                    if (Math.abs(fishVelocity.length()) > 1) { // Only emit bubbles when moving
+                        positions[i * 3] = fishGroup.position.x + (Math.random() - 0.5);
+                        positions[i * 3 + 1] = fishGroup.position.y;
+                        positions[i * 3 + 2] = fishGroup.position.z + (Math.random() - 0.5);
+                    }
+                }
+            }
+            bubbles.geometry.attributes.position.needsUpdate = true;
+
+            // --- Portfolio Item Animation ---
+            portfolioItems.forEach(item => {
+                item.mesh.rotation.y += deltaTime * 0.1;
+                item.mesh.position.y = item.pos.y + Math.sin(elapsedTime + item.pos.x) * 0.5;
+                if(item.light){
+                    item.light.intensity = 2 + Math.sin(elapsedTime * 2) * 0.5;
+                }
+            });
+            
+            // --- God Rays Animation ---
+            godraysEffect.rotation.y += deltaTime * 0.02;
+
+            // --- Camera Follow Logic ---
+            if (!isMobile) {
+                // For desktop, the camera is an OrbitControls
+                controls.target.copy(fishGroup.position);
+                controls.update();
+            } else {
+                // For mobile, the camera is directly attached behind the fish
+                const targetCameraPosition = fishGroup.position.clone().add(cameraOffset.clone().applyQuaternion(fishGroup.quaternion));
+                camera.position.lerp(targetCameraPosition, deltaTime * 4.0);
+                camera.lookAt(fishGroup.position);
+            }
+
+            // --- Portfolio Interaction Logic ---
+            let closestItem = null;
+            let minDistance = 10;
+            portfolioItems.forEach(item => {
+                const distance = fishGroup.position.distanceTo(item.mesh.position);
+                if (distance < minDistance) {
+                    closestItem = item;
+                    minDistance = distance;
+                }
+            });
+            if (closestItem && closestItem !== activePortfolioItem) {
+                activePortfolioItem = closestItem;
+                portfolioTitle.textContent = closestItem.title;
+                portfolioDesc.textContent = closestItem.desc;
+                portfolioLink.href = closestItem.link;
+                portfolioPanel.classList.add('visible');
+            } else if (!closestItem && activePortfolioItem) {
+                activePortfolioItem = null;
+                portfolioPanel.classList.remove('visible');
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // --- WINDOW RESIZE HANDLER ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- LOADING SCREEN ---
+        const loadingScreen = document.getElementById('loading-screen');
+        
+        // Hide loading screen after a short delay to ensure everything is loaded
+        setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+        }, 1500);
+
+        // Start the animation loop
+        animate();
+
+        // --- PERFORMANCE MONITORING ---
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Only show performance stats in development
+            const stats = new THREE.Stats();
+            document.body.appendChild(stats.dom);
+            stats.dom.style.position = 'absolute';
+            stats.dom.style.top = '0px';
+            stats.dom.style.left = '0px';
+            stats.dom.style.zIndex = '1000';
+            
+            function updateStats() {
+                stats.update();
+                requestAnimationFrame(updateStats);
+            }
+            updateStats();
+        }
+    </script>
+</body>
+</html>

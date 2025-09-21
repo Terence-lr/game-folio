@@ -1,0 +1,21 @@
+{
+  "name": "Gamefolio - Underwater Portfolio",
+  "short_name": "Gamefolio",
+  "description": "Navigate an immersive 3D underwater world to explore Terence Richardson's portfolio projects and skills",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#050a1a",
+  "theme_color": "#ff4500",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "games", "3d", "interactive"],
+  "lang": "en",
+  "dir": "ltr"
+}
