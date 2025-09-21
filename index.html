@@ -311,9 +311,9 @@
         
         <div id="instructions-panel" class="info-panel visible">
             <h2>Welcome to Gamefolio</h2>
-            <p><strong>Desktop:</strong> <strong>W</strong> forward, <strong>S</strong> backward (turns around), <strong>A/D</strong> left/right, <strong>Q/E</strong> up/down, <strong>Space</strong> boost. Use <strong>mouse drag</strong> to rotate camera.</p>
+            <p><strong>Desktop:</strong> <strong>W</strong> forward, <strong>S</strong> backward, <strong>A/D</strong> left/right, <strong>Q/E</strong> up/down, <strong>Space</strong> boost. Use <strong>mouse drag</strong> to rotate camera.</p>
             <p><strong>Mobile:</strong> Use joystick, side buttons for depth, and boost button. <strong>Touch & drag</strong> to rotate camera.</p>
-            <button id="start-button">Dive In</button>
+            <button id="start-button">Explore</button>
         </div>
         
         <div id="portfolio-info-panel" class="info-panel">
@@ -340,7 +340,7 @@
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x001122, 0.008); // Deeper, more atmospheric fog
+        scene.fog = new THREE.FogExp2(0xff8c42, 0.01); // Orange fog like Bruno Simon
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
@@ -374,39 +374,34 @@
             controls.target.set(0, 0, 0); // Camera will orbit a central point
         }
 
-        // --- ENHANCED LIGHTING ---
-        // Main underwater ambient light
-        const ambientLight = new THREE.AmbientLight(0x1a4d80, 0.6);
+        // --- LOW-POLY WORLD LIGHTING ---
+        // Warm ambient light for low-poly world
+        const ambientLight = new THREE.AmbientLight(0xff8c42, 0.8);
         scene.add(ambientLight);
         
-        // Sunlight from above (simulating light filtering through water)
-        const sunLight = new THREE.DirectionalLight(0x87ceeb, 2.0);
-        sunLight.position.set(0, 50, 0);
+        // Main directional light (sun)
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        sunLight.position.set(10, 20, 5);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 4096;
-        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
         sunLight.shadow.camera.near = 0.5;
         sunLight.shadow.camera.far = 100;
-        sunLight.shadow.camera.left = -50;
-        sunLight.shadow.camera.right = 50;
-        sunLight.shadow.camera.top = 50;
-        sunLight.shadow.camera.bottom = -50;
+        sunLight.shadow.camera.left = -30;
+        sunLight.shadow.camera.right = 30;
+        sunLight.shadow.camera.top = 30;
+        sunLight.shadow.camera.bottom = -30;
         sunLight.shadow.bias = -0.0001;
         scene.add(sunLight);
         
-        // Caustic light effect (moving light patterns)
-        const causticLight = new THREE.PointLight(0x00ffff, 1.5, 30);
-        causticLight.position.set(0, 10, 0);
-        scene.add(causticLight);
+        // Accent lights for the low-poly world
+        const accentLight1 = new THREE.PointLight(0xff6b35, 1.0, 20);
+        accentLight1.position.set(-10, 5, -10);
+        scene.add(accentLight1);
         
-        // Deep sea bioluminescent glow
-        const bioLight = new THREE.PointLight(0x00ff88, 0.8, 25);
-        bioLight.position.set(-15, -10, 0);
-        scene.add(bioLight);
-        
-        const bioLight2 = new THREE.PointLight(0xff4488, 0.8, 25);
-        bioLight2.position.set(15, -15, 10);
-        scene.add(bioLight2);
+        const accentLight2 = new THREE.PointLight(0xff8c42, 0.8, 15);
+        accentLight2.position.set(10, 3, 10);
+        scene.add(accentLight2);
 
         // --- GOD RAYS (VOLUMETRIC LIGHTING EFFECT) ---
         const godraysEffect = new THREE.Group();
@@ -450,340 +445,364 @@
         scene.add(godraysEffect);
 
         // --- ENHANCED ENVIRONMENT ---
-        // Ocean floor with gradient material
-        const floorGeometry = new THREE.PlaneGeometry(300, 300, 32, 32);
-        const floorMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x0a1a2e,
-            roughness: 0.9,
+        // Low-poly ground with platforms
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff8c42,
+            roughness: 0.8,
             metalness: 0.1
         });
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -25;
-        floor.receiveShadow = true;
-        scene.add(floor);
         
-        // Add height variation to floor
-        const floorVertices = floor.geometry.attributes.position.array;
-        for (let i = 0; i < floorVertices.length; i += 3) {
-            floorVertices[i + 2] += (Math.random() - 0.5) * 2; // Add some height variation
-        }
-        floor.geometry.attributes.position.needsUpdate = true;
-        floor.geometry.computeVertexNormals();
+        // Main ground platform
+        const mainGround = new THREE.Mesh(
+            new THREE.BoxGeometry(50, 1, 50),
+            groundMaterial
+        );
+        mainGround.position.y = -1;
+        mainGround.receiveShadow = true;
+        scene.add(mainGround);
         
-        // Enhanced rock formations
-        const rockMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x34495e,
-            roughness: 0.8,
+        // Additional platforms like Bruno Simon site
+        const platformMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff,
+            roughness: 0.6,
             metalness: 0.2
         });
         
-        // Large rock formations
-        for (let i = 0; i < 30; i++) {
-            const radius = Math.random() * 3 + 1;
-            const rock = new THREE.Mesh(
-                new THREE.SphereGeometry(radius, 12, 8), 
-                rockMaterial
-            );
-            rock.position.set(
-                (Math.random() - 0.5) * 200,
-                -25 + radius * 0.6,
-                (Math.random() - 0.5) * 200
-            );
-            rock.scale.set(
-                1 + Math.random() * 0.5,
-                0.5 + Math.random() * 0.8,
-                1 + Math.random() * 0.5
-            );
-            rock.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                Math.random() * Math.PI
-            );
-            rock.castShadow = true;
-            rock.receiveShadow = true;
-            scene.add(rock);
-        }
+        // Platform 1
+        const platform1 = new THREE.Mesh(
+            new THREE.BoxGeometry(8, 0.5, 8),
+            platformMaterial
+        );
+        platform1.position.set(-15, 0, -10);
+        platform1.receiveShadow = true;
+        scene.add(platform1);
         
-        // Seaweed/kelp
-        const seaweedMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x2d5016,
-            roughness: 0.9,
-            metalness: 0.0
+        // Platform 2
+        const platform2 = new THREE.Mesh(
+            new THREE.BoxGeometry(6, 0.5, 6),
+            platformMaterial
+        );
+        platform2.position.set(15, 0, 10);
+        platform2.receiveShadow = true;
+        scene.add(platform2);
+        
+        // Platform 3
+        const platform3 = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 0.5, 4),
+            platformMaterial
+        );
+        platform3.position.set(0, 0, -20);
+        platform3.receiveShadow = true;
+        scene.add(platform3);
+        
+        // Low-poly objects like Bruno Simon site
+        const objectMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff6b35,
+            roughness: 0.7,
+            metalness: 0.1
         });
         
-        for (let i = 0; i < 40; i++) {
-            const height = Math.random() * 8 + 3;
-            const seaweed = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.1, 0.3, height, 6),
-                seaweedMaterial
+        // Low-poly blocks scattered around
+        for (let i = 0; i < 15; i++) {
+            const block = new THREE.Mesh(
+                new THREE.BoxGeometry(
+                    Math.random() * 2 + 1,
+                    Math.random() * 2 + 1,
+                    Math.random() * 2 + 1
+                ), 
+                objectMaterial
             );
-            seaweed.position.set(
-                (Math.random() - 0.5) * 180,
-                -25 + height / 2,
-                (Math.random() - 0.5) * 180
+            block.position.set(
+                (Math.random() - 0.5) * 40,
+                Math.random() * 2,
+                (Math.random() - 0.5) * 40
             );
-            seaweed.rotation.z = (Math.random() - 0.5) * 0.3;
-            seaweed.castShadow = true;
-            seaweed.receiveShadow = true;
-            scene.add(seaweed);
+            block.rotation.set(
+                Math.random() * Math.PI * 0.5,
+                Math.random() * Math.PI * 0.5,
+                Math.random() * Math.PI * 0.5
+            );
+            block.castShadow = true;
+            block.receiveShadow = true;
+            scene.add(block);
         }
         
-        // Coral formations
-        const coralMaterial = new THREE.MeshStandardMaterial({ 
+        // Low-poly pyramids
+        const pyramidMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff9f43,
+            roughness: 0.6,
+            metalness: 0.2
+        });
+        
+        for (let i = 0; i < 8; i++) {
+            const pyramid = new THREE.Mesh(
+                new THREE.ConeGeometry(1.5, 3, 4),
+                pyramidMaterial
+            );
+            pyramid.position.set(
+                (Math.random() - 0.5) * 30,
+                1.5,
+                (Math.random() - 0.5) * 30
+            );
+            pyramid.rotation.y = Math.random() * Math.PI;
+            pyramid.castShadow = true;
+            pyramid.receiveShadow = true;
+            scene.add(pyramid);
+        }
+        
+        // Low-poly trees/plants
+        const treeMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a7c59,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        for (let i = 0; i < 12; i++) {
+            // Tree trunk
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.3, 0.4, 4, 6),
+                treeMaterial
+            );
+            trunk.position.set(
+                (Math.random() - 0.5) * 35,
+                2,
+                (Math.random() - 0.5) * 35
+            );
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            scene.add(trunk);
+            
+            // Tree top
+            const treeTop = new THREE.Mesh(
+                new THREE.SphereGeometry(2, 6, 4),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x2d5016,
+                    roughness: 0.9,
+                    metalness: 0.0
+                })
+            );
+            treeTop.position.set(
+                trunk.position.x,
+                5,
+                trunk.position.z
+            );
+            treeTop.castShadow = true;
+            treeTop.receiveShadow = true;
+            scene.add(treeTop);
+        }
+        
+        // Low-poly decorative objects
+        const decorMaterial = new THREE.MeshStandardMaterial({ 
             color: 0xff6b6b,
             roughness: 0.7,
             metalness: 0.1
         });
         
-        for (let i = 0; i < 25; i++) {
-            const coral = new THREE.Mesh(
-                new THREE.ConeGeometry(0.5 + Math.random() * 1, 2 + Math.random() * 3, 6),
-                coralMaterial
+        for (let i = 0; i < 15; i++) {
+            const decor = new THREE.Mesh(
+                new THREE.ConeGeometry(0.5 + Math.random() * 1, 2 + Math.random() * 2, 6),
+                decorMaterial
             );
-            coral.position.set(
-                (Math.random() - 0.5) * 160,
-                -25,
-                (Math.random() - 0.5) * 160
+            decor.position.set(
+                (Math.random() - 0.5) * 30,
+                1,
+                (Math.random() - 0.5) * 30
             );
-            coral.rotation.set(
-                (Math.random() - 0.5) * 0.5,
+            decor.rotation.set(
+                (Math.random() - 0.5) * 0.3,
                 Math.random() * Math.PI * 2,
-                (Math.random() - 0.5) * 0.5
+                (Math.random() - 0.5) * 0.3
             );
-            coral.castShadow = true;
-            coral.receiveShadow = true;
-            scene.add(coral);
+            decor.castShadow = true;
+            decor.receiveShadow = true;
+            scene.add(decor);
         }
 
-        // --- ENHANCED FISH CHARACTER ---
-        const fishGroup = new THREE.Group();
+        // --- LOW-POLY PERSON CHARACTER ---
+        const personGroup = new THREE.Group();
         
-        // Main body with fish-like shape
-        const fishBody = new THREE.Mesh(
-            new THREE.SphereGeometry(0.8, 12, 8),
-            new THREE.MeshStandardMaterial({ 
-                color: 0xff6b35,
-                metalness: 0.2,
-                roughness: 0.4
-            })
-        );
-        fishBody.scale.set(1.2, 0.8, 1.0);
-        fishBody.rotation.z = Math.PI / 2;
-        fishBody.castShadow = true;
-        fishGroup.add(fishBody);
-
-        // Fish head
-        const fishHead = new THREE.Mesh(
-            new THREE.SphereGeometry(0.6, 12, 8),
-            new THREE.MeshStandardMaterial({ 
-                color: 0xff7b45,
-                metalness: 0.2,
-                roughness: 0.4
-            })
-        );
-        fishHead.position.x = 1.0;
-        fishHead.scale.set(1.0, 0.9, 0.8);
-        fishHead.castShadow = true;
-        fishGroup.add(fishHead);
-
-        // Enhanced tail with better geometry
-        const fishTail = new THREE.Mesh(
-            new THREE.ConeGeometry(0.8, 1.2, 6),
-            new THREE.MeshStandardMaterial({ 
-                color: 0xff8c42,
-                metalness: 0.3,
-                roughness: 0.4,
-                side: THREE.DoubleSide
-            })
-        );
-        fishTail.position.x = -1.5;
-        fishTail.rotation.z = Math.PI / 2;
-        fishTail.scale.set(0.8, 1.0, 0.6);
-        fishGroup.add(fishTail);
-
-        // Enhanced fins with better materials
-        const finMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff9f43,
-            metalness: 0.2,
-            roughness: 0.5,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.9
+        // Low-poly person material
+        const personMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffb366,
+            metalness: 0.1,
+            roughness: 0.8
         });
         
-        // Dorsal fin
-        const dorsalFin = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.8), finMaterial);
-        dorsalFin.position.set(0.3, 0.6, 0);
-        dorsalFin.rotation.z = Math.PI / 6;
-        fishGroup.add(dorsalFin);
-
-        // Side fins
-        const sideFinL = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.6), finMaterial);
-        sideFinL.position.set(0.2, -0.1, 0.6);
-        sideFinL.rotation.y = Math.PI / 2;
-        sideFinL.rotation.z = -Math.PI / 8;
-        fishGroup.add(sideFinL);
+        // Head
+        const head = new THREE.Mesh(
+            new THREE.SphereGeometry(0.4, 8, 6),
+            personMaterial
+        );
+        head.position.y = 1.2;
+        head.castShadow = true;
+        personGroup.add(head);
         
-        const sideFinR = sideFinL.clone();
-        sideFinR.position.z = -0.6;
-        sideFinR.rotation.z = Math.PI / 8;
-        fishGroup.add(sideFinR);
+        // Body
+        const body = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 1.0, 0.4),
+            personMaterial
+        );
+        body.position.y = 0.3;
+        body.castShadow = true;
+        personGroup.add(body);
         
-        // Pectoral fins
-        const pectoralFinL = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.5), finMaterial);
-        pectoralFinL.position.set(0.5, 0.2, 0.4);
-        pectoralFinL.rotation.y = Math.PI / 2;
-        pectoralFinL.rotation.x = Math.PI / 6;
-        fishGroup.add(pectoralFinL);
+        // Arms
+        const armMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffb366,
+            metalness: 0.1,
+            roughness: 0.8
+        });
         
-        const pectoralFinR = pectoralFinL.clone();
-        pectoralFinR.position.z = -0.4;
-        pectoralFinR.rotation.x = -Math.PI / 6;
-        fishGroup.add(pectoralFinR);
+        const leftArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            armMaterial
+        );
+        leftArm.position.set(-0.5, 0.2, 0);
+        leftArm.castShadow = true;
+        personGroup.add(leftArm);
+        
+        const rightArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            armMaterial
+        );
+        rightArm.position.set(0.5, 0.2, 0);
+        rightArm.castShadow = true;
+        personGroup.add(rightArm);
+        
+        // Legs
+        const legMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a4a4a,
+            metalness: 0.1,
+            roughness: 0.8
+        });
+        
+        const leftLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            legMaterial
+        );
+        leftLeg.position.set(-0.2, -0.6, 0);
+        leftLeg.castShadow = true;
+        personGroup.add(leftLeg);
+        
+        const rightLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            legMaterial
+        );
+        rightLeg.position.set(0.2, -0.6, 0);
+        rightLeg.castShadow = true;
+        personGroup.add(rightLeg);
         
         // Eyes
-        const eyeMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff,
-            metalness: 0.8,
-            roughness: 0.1
-        });
-        const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), eyeMaterial);
-        eyeL.position.set(0.8, 0.2, 0.3);
-        fishGroup.add(eyeL);
+        const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), eyeMaterial);
+        leftEye.position.set(-0.1, 1.3, 0.3);
+        personGroup.add(leftEye);
         
-        const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), eyeMaterial);
-        eyeR.position.set(0.8, 0.2, -0.3);
-        fishGroup.add(eyeR);
+        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), eyeMaterial);
+        rightEye.position.set(0.1, 1.3, 0.3);
+        personGroup.add(rightEye);
         
-        // Pupils
-        const pupilMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), pupilMaterial);
-        pupilL.position.set(0.85, 0.2, 0.3);
-        fishGroup.add(pupilL);
-        
-        const pupilR = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6, 6), pupilMaterial);
-        pupilR.position.set(0.85, 0.2, -0.3);
-        fishGroup.add(pupilR);
-        
-        scene.add(fishGroup);
+        scene.add(personGroup);
 
-        // --- ENHANCED BUBBLE PARTICLE SYSTEM ---
-        const bubbleCount = 50;
-        const bubbleGeometry = new THREE.BufferGeometry();
-        const bubblePositions = new Float32Array(bubbleCount * 3);
-        const bubbleSizes = new Float32Array(bubbleCount);
-        const bubbleVelocities = [];
+        // --- FLOATING PARTICLE SYSTEM ---
+        const particleCount = 30;
+        const particleGeometry = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleSizes = new Float32Array(particleCount);
+        const particleVelocities = [];
 
-        for (let i = 0; i < bubbleCount; i++) {
-            bubbleVelocities.push(new THREE.Vector3(
-                (Math.random() - 0.5) * 0.15, 
-                Math.random() * 0.8 + 0.2, 
-                (Math.random() - 0.5) * 0.15
+        for (let i = 0; i < particleCount; i++) {
+            particleVelocities.push(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.1, 
+                Math.random() * 0.3 + 0.1, 
+                (Math.random() - 0.5) * 0.1
             ));
-            bubbleSizes[i] = Math.random() * 0.4 + 0.1;
+            particleSizes[i] = Math.random() * 0.3 + 0.1;
         }
-        bubbleGeometry.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
-        bubbleGeometry.setAttribute('size', new THREE.BufferAttribute(bubbleSizes, 1));
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
         
-        const bubbles = new THREE.Points(bubbleGeometry, new THREE.PointsMaterial({
-            color: 0x87ceeb,
-            size: 0.2,
+        const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
+            color: 0xff8c42,
+            size: 0.3,
             transparent: true,
-            opacity: 0.6,
+            opacity: 0.7,
             blending: THREE.AdditiveBlending,
             sizeAttenuation: true
         }));
-        scene.add(bubbles);
-        
-        // Floating particles (plankton, debris)
-        const particleCount = 100;
-        const particleGeometry = new THREE.BufferGeometry();
-        const particlePositions = new Float32Array(particleCount * 3);
-        const particleColors = new Float32Array(particleCount * 3);
-        
-        for (let i = 0; i < particleCount; i++) {
-            particlePositions[i * 3] = (Math.random() - 0.5) * 200;
-            particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
-            
-            // Random colors for plankton
-            const color = new THREE.Color();
-            color.setHSL(Math.random() * 0.3 + 0.1, 0.8, 0.6);
-            particleColors[i * 3] = color.r;
-            particleColors[i * 3 + 1] = color.g;
-            particleColors[i * 3 + 2] = color.b;
-        }
-        
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-        particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
-        
-        const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
-            size: 0.05,
-            transparent: true,
-            opacity: 0.8,
-            vertexColors: true,
-            blending: THREE.AdditiveBlending
-        }));
         scene.add(particles);
+        
 
         // --- PORTFOLIO ITEMS ---
         const portfolioItems = [];
         const portfolioItemData = [
-             { type: 'crystal', pos: new THREE.Vector3(-20, -5, 0), color: 0x00ffff, title: "Portfolio Website", desc: "The very site you are exploring now! Built with Three.js to create an interactive experience.", link: "https://github.com/Terence-lr/Portfolio-site" },
-             { type: 'chest', pos: new THREE.Vector3(20, -18, 0), color: 0x8B4513, title: "Total Job Tracker", desc: "A full-stack application to help users track their job applications from start to finish.", link: "https://github.com/Terence-lr/total-job-tracker-" },
-             { type: 'monolith', pos: new THREE.Vector3(0, -15, -20), color: 0x778899, title: "Distance Converter", desc: "A handy utility tool for converting various units of distance, built with clean UI principles.", link: "https://github.com/Terence-lr/distance-converter" },
-             { type: 'shipwreck', pos: new THREE.Vector3(0, -18, 20), color: 0x5d4a44, title: "My GitHub Profile", desc: "Explore all my other projects and contributions. Let's connect!", link: "https://github.com/Terence-lr" },
+             { type: 'computer', pos: new THREE.Vector3(-15, 1, -10), color: 0x4a90e2, title: "Portfolio Website", desc: "The very site you are exploring now! Built with Three.js to create an interactive experience.", link: "https://github.com/Terence-lr/Portfolio-site" },
+             { type: 'building', pos: new THREE.Vector3(15, 1, 10), color: 0x8B4513, title: "Total Job Tracker", desc: "A full-stack application to help users track their job applications from start to finish.", link: "https://github.com/Terence-lr/total-job-tracker-" },
+             { type: 'tower', pos: new THREE.Vector3(0, 1, -20), color: 0x778899, title: "Distance Converter", desc: "A handy utility tool for converting various units of distance, built with clean UI principles.", link: "https://github.com/Terence-lr/distance-converter" },
+             { type: 'house', pos: new THREE.Vector3(0, 1, 20), color: 0x5d4a44, title: "My GitHub Profile", desc: "Explore all my other projects and contributions. Let's connect!", link: "https://github.com/Terence-lr" },
         ];
         
         portfolioItemData.forEach(data => {
             const group = new THREE.Group();
             const material = new THREE.MeshStandardMaterial({ color: data.color, metalness: 0.2, roughness: 0.8 });
 
-            if (data.type === 'crystal') {
-                // Simple fish shape for portfolio
-                const fishBody = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 6), material);
-                fishBody.scale.set(1.5, 0.8, 1.0);
-                fishBody.castShadow = true;
-                fishBody.receiveShadow = true;
-                group.add(fishBody);
+            if (data.type === 'computer') {
+                // Low-poly computer
+                const monitor = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 0.3), material);
+                monitor.position.y = 1;
+                monitor.castShadow = true;
+                monitor.receiveShadow = true;
+                group.add(monitor);
                 
-                const fishTail = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.5, 6), material);
-                fishTail.position.x = -1.5;
-                fishTail.rotation.z = Math.PI / 2;
-                fishTail.castShadow = true;
-                fishTail.receiveShadow = true;
-                group.add(fishTail);
+                const stand = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 1), material);
+                stand.position.y = 0.25;
+                stand.castShadow = true;
+                stand.receiveShadow = true;
+                group.add(stand);
                 
-                const pointLight = new THREE.PointLight(data.color, 2, 20);
+                const pointLight = new THREE.PointLight(data.color, 2, 15);
                 group.add(pointLight);
                 data.light = pointLight;
-            } else if (data.type === 'chest') {
-                const base = new THREE.Mesh(new THREE.BoxGeometry(4, 2.5, 3), material);
+            } else if (data.type === 'building') {
+                // Low-poly building
+                const base = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 3), material);
+                base.position.y = 2;
                 base.castShadow = true;
                 base.receiveShadow = true;
-                const lid = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 3), material);
-                lid.position.y = 2;
-                lid.rotation.x = -0.3;
-                lid.castShadow = true;
-                lid.receiveShadow = true;
-                group.add(base, lid);
-            } else if (data.type === 'monolith') {
-                const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 8, 8), material);
-                pillar.castShadow = true;
-                pillar.receiveShadow = true;
-                group.add(pillar);
-            } else if (data.type === 'shipwreck') {
-                const plank1 = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 0.5), material);
-                plank1.rotation.z = 0.8;
-                plank1.castShadow = true;
-                plank1.receiveShadow = true;
-                const plank2 = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 0.5), material);
-                plank2.rotation.z = 0.6;
-                plank2.position.x = 1.5;
-                plank2.castShadow = true;
-                plank2.receiveShadow = true;
-                group.add(plank1, plank2);
+                group.add(base);
+                
+                const roof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 2, 4), material);
+                roof.position.y = 5;
+                roof.castShadow = true;
+                roof.receiveShadow = true;
+                group.add(roof);
+            } else if (data.type === 'tower') {
+                // Low-poly tower
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2, 6, 8), material);
+                base.position.y = 3;
+                base.castShadow = true;
+                base.receiveShadow = true;
+                group.add(base);
+                
+                const top = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3, 8), material);
+                top.position.y = 7.5;
+                top.castShadow = true;
+                top.receiveShadow = true;
+                group.add(top);
+            } else if (data.type === 'house') {
+                // Low-poly house
+                const base = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), material);
+                base.position.y = 1.5;
+                base.castShadow = true;
+                base.receiveShadow = true;
+                group.add(base);
+                
+                const roof = new THREE.Mesh(new THREE.ConeGeometry(3, 2, 4), material);
+                roof.position.y = 4;
+                roof.rotation.y = Math.PI / 4;
+                roof.castShadow = true;
+                roof.receiveShadow = true;
+                group.add(roof);
             }
             group.position.copy(data.pos);
             scene.add(group);
@@ -931,8 +950,8 @@
                 if(e.touches.length === 1 && !isDragging) {
                     const deltaX = e.touches[0].clientX - lastTouchX;
                     const deltaY = e.touches[0].clientY - lastTouchY;
-                    fishGroup.rotation.y -= deltaX * 0.005;
-                    fishGroup.rotation.x += deltaY * 0.005; // Added vertical camera rotation
+                    personGroup.rotation.y -= deltaX * 0.005;
+                    personGroup.rotation.x += deltaY * 0.005; // Added vertical camera rotation
                     lastTouchX = e.touches[0].clientX;
                     lastTouchY = e.touches[0].clientY;
                 }
@@ -959,15 +978,8 @@
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
-            // --- WASD Fish Movement & Physics ---
+            // --- WASD Character Movement & Physics ---
             const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
-            
-            // Handle backward movement with turning
-            if (moveState.forward < 0) {
-                // Turn fish around when going backward
-                const turnSpeed = 0.15 * speedMultiplier;
-                fishGroup.rotation.y += turnSpeed;
-            }
             
             const targetSpeed = Math.abs(moveState.forward) * baseSpeed * speedMultiplier;
             
@@ -980,14 +992,14 @@
             
             // Vertical rotation for Q/E controls
             const pitchSpeed = 0.05 * speedMultiplier;
-            fishGroup.rotation.x -= moveState.up * pitchSpeed;
+            personGroup.rotation.x -= moveState.up * pitchSpeed;
 
             // Constrain fish's vertical rotation to avoid flipping
-            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
+            personGroup.rotation.x = THREE.MathUtils.clamp(personGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
 
             // WASD movement calculation
-            const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(fishGroup.quaternion);
-            const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(fishGroup.quaternion);
+            const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(personGroup.quaternion);
+            const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(personGroup.quaternion);
 
             // Forward/backward movement (W/S)
             const targetVelocity = forwardVector.multiplyScalar(currentSpeed * moveState.forward);
@@ -999,7 +1011,7 @@
             targetVelocity.y += moveState.up * currentSpeed * 0.7;
 
             fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
-            fishGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
+            personGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
             
             // Update speed indicator
             const speedIndicator = document.getElementById('speed-indicator');
@@ -1030,44 +1042,34 @@
             dorsalFin.rotation.z = Math.sin(elapsedTime * wiggleSpeed * 0.5) * 0.15;
             
             // --- Enhanced Bubble Animation ---
-            const positions = bubbles.geometry.attributes.position.array;
-            const sizes = bubbles.geometry.attributes.size.array;
+            const positions = particles.geometry.attributes.position.array;
+            const sizes = particles.geometry.attributes.size.array;
             
-            for (let i = 0; i < bubbleCount; i++) {
-                // Enhanced bubble movement with drift
-                positions[i * 3] += bubbleVelocities[i].x * deltaTime * 2;
-                positions[i * 3 + 1] += bubbleVelocities[i].y * (isBoosting ? 3.0 : 1.5);
-                positions[i * 3 + 2] += bubbleVelocities[i].z * deltaTime * 2;
+            for (let i = 0; i < particleCount; i++) {
+                // Floating particle movement
+                positions[i * 3] += particleVelocities[i].x * deltaTime;
+                positions[i * 3 + 1] += particleVelocities[i].y * deltaTime;
+                positions[i * 3 + 2] += particleVelocities[i].z * deltaTime;
                 
-                // Bubble size variation
-                sizes[i] = 0.1 + Math.sin(elapsedTime * 2 + i) * 0.1;
+                // Particle size variation
+                sizes[i] = 0.1 + Math.sin(elapsedTime * 1.5 + i) * 0.1;
                 
-                // Reset bubbles that have risen too high
-                if (positions[i * 3 + 1] > fishGroup.position.y + 15) {
-                    if (Math.abs(fishVelocity.length()) > 0.5) { // Emit bubbles when moving
-                        positions[i * 3] = fishGroup.position.x + (Math.random() - 0.5) * 2;
-                        positions[i * 3 + 1] = fishGroup.position.y - 1;
-                        positions[i * 3 + 2] = fishGroup.position.z + (Math.random() - 0.5) * 2;
+                // Reset particles that have moved too far
+                if (positions[i * 3 + 1] > personGroup.position.y + 20) {
+                    positions[i * 3] = personGroup.position.x + (Math.random() - 0.5) * 10;
+                    positions[i * 3 + 1] = personGroup.position.y - 5;
+                    positions[i * 3 + 2] = personGroup.position.z + (Math.random() - 0.5) * 10;
                         
-                        // Update velocity based on fish movement
-                        bubbleVelocities[i].x = (Math.random() - 0.5) * 0.2;
-                        bubbleVelocities[i].y = Math.random() * 0.8 + 0.3;
-                        bubbleVelocities[i].z = (Math.random() - 0.5) * 0.2;
+                        // Update velocity based on person movement
+                        particleVelocities[i].x = (Math.random() - 0.5) * 0.1;
+                        particleVelocities[i].y = Math.random() * 0.3 + 0.1;
+                        particleVelocities[i].z = (Math.random() - 0.5) * 0.1;
                     }
                 }
             }
-            bubbles.geometry.attributes.position.needsUpdate = true;
-            bubbles.geometry.attributes.size.needsUpdate = true;
-            
-            // --- Floating Particles Animation ---
-            const particlePositions = particles.geometry.attributes.position.array;
-            for (let i = 0; i < particleCount; i++) {
-                // Gentle floating motion
-                particlePositions[i * 3 + 1] += Math.sin(elapsedTime * 0.5 + i * 0.1) * 0.01;
-                particlePositions[i * 3] += Math.cos(elapsedTime * 0.3 + i * 0.05) * 0.005;
-                particlePositions[i * 3 + 2] += Math.sin(elapsedTime * 0.4 + i * 0.08) * 0.005;
-            }
             particles.geometry.attributes.position.needsUpdate = true;
+            particles.geometry.attributes.size.needsUpdate = true;
+            
 
             // --- Enhanced Portfolio Item Animation ---
             portfolioItems.forEach(item => {
@@ -1096,20 +1098,20 @@
             // --- Camera Follow Logic ---
             if (!isMobile) {
                 // For desktop, the camera is an OrbitControls
-                controls.target.copy(fishGroup.position);
+                controls.target.copy(personGroup.position);
                 controls.update();
             } else {
                 // For mobile, the camera is directly attached behind the fish
-                const targetCameraPosition = fishGroup.position.clone().add(cameraOffset.clone().applyQuaternion(fishGroup.quaternion));
+                const targetCameraPosition = personGroup.position.clone().add(cameraOffset.clone().applyQuaternion(personGroup.quaternion));
                 camera.position.lerp(targetCameraPosition, deltaTime * 4.0);
-                camera.lookAt(fishGroup.position);
+                camera.lookAt(personGroup.position);
             }
 
             // --- Portfolio Interaction Logic ---
             let closestItem = null;
             let minDistance = 10;
             portfolioItems.forEach(item => {
-                const distance = fishGroup.position.distanceTo(item.mesh.position);
+                const distance = personGroup.position.distanceTo(item.mesh.position);
                 if (distance < minDistance) {
                     closestItem = item;
                     minDistance = distance;
