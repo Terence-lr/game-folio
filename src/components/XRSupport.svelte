@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { XR, ARButton, VRButton } from '@threlte/xr';
+  import { XR, ARButton, VRButton, XRButton } from '@threlte/xr';
   // XR support without useFrame for now
   
   let xrSupported = false;
@@ -49,26 +49,31 @@
 </script>
 
 <!-- XR Support -->
-{#if xrSupported}
-  <XR
-    on:sessionstart={handleXRStart}
-    on:sessionend={handleXREnd}
-  >
-    <!-- VR Button -->
-    {#if vrSupported}
-      <VRButton
-        style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;"
-      />
-    {/if}
-    
-    <!-- AR Button -->
-    {#if arSupported}
-      <ARButton
-        style="position: fixed; bottom: 80px; right: 20px; z-index: 1000;"
-      />
-    {/if}
-  </XR>
-{/if}
+<XR
+  on:sessionstart={handleXRStart}
+  on:sessionend={handleXREnd}
+>
+  <!-- VR Button -->
+  {#if vrSupported}
+    <VRButton
+      style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: linear-gradient(45deg, #4a90e2, #87ceeb); color: white; border: none; padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; font-family: 'Courier New', monospace;"
+    />
+  {/if}
+  
+  <!-- AR Button -->
+  {#if arSupported}
+    <ARButton
+      style="position: fixed; bottom: 80px; right: 20px; z-index: 1000; background: linear-gradient(45deg, #87ceeb, #98d8e8); color: white; border: none; padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; font-family: 'Courier New', monospace;"
+    />
+  {/if}
+  
+  <!-- XR Button (fallback) -->
+  {#if xrSupported && !vrSupported && !arSupported}
+    <XRButton
+      style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: linear-gradient(45deg, #4a90e2, #87ceeb); color: white; border: none; padding: 15px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; font-family: 'Courier New', monospace;"
+    />
+  {/if}
+</XR>
 
 <!-- XR Status Indicator -->
 {#if xrSupported}

@@ -3,7 +3,7 @@
   // Shader system without useFrame for now
   
   // Custom shader materials inspired by The Book of Shaders
-  export const createAuroraShader = () => {
+  const createAuroraShader = () => {
     return new ShaderMaterial({
       uniforms: {
         time: { value: 0.0 },
@@ -91,7 +91,7 @@
     });
   };
   
-  export const createWaterShader = () => {
+  const createWaterShader = () => {
     return new ShaderMaterial({
       uniforms: {
         time: { value: 0.0 },
@@ -142,7 +142,7 @@
     });
   };
   
-  export const createCrystalShader = () => {
+  const createCrystalShader = () => {
     return new ShaderMaterial({
       uniforms: {
         time: { value: 0.0 },
@@ -190,11 +190,14 @@
   };
   
   // Update shader uniforms
-  export const updateShaderTime = (shader, time) => {
+  const updateShaderTime = (shader, time) => {
     if (shader && shader.uniforms && shader.uniforms.time) {
       shader.uniforms.time.value = time;
     }
   };
+  
+  // Export functions
+  export { createAuroraShader, createWaterShader, createCrystalShader, updateShaderTime };
 </script>
 
 <!-- Shader system is now available to other components -->

@@ -1,7 +1,7 @@
 <script>
   import { Mesh, Group, BoxGeometry, CylinderGeometry } from '@threlte/core';
   import { MeshStandardMaterial, TextGeometry, FontLoader } from 'three';
-  // Physics temporarily disabled for compatibility
+  import { RigidBody, Collider } from '@threlte/rapier';
   import { onMount } from 'svelte';
   // Animation temporarily disabled for compatibility
   
@@ -94,13 +94,17 @@
 </script>
 
 {#each portfolioData as data, index}
-  <group
+  <RigidBody
+    type="fixed"
     position={data.position}
-    bind:this={(el) => billboards[index] = { group: el }}
-    interactive
-    cursor="pointer"
     on:click={() => handleBillboardClick(data.link)}
   >
+    <Collider type="cuboid" args={[3, 2, 0.2]} />
+    <group
+      bind:this={(el) => billboards[index] = { group: el }}
+      interactive
+      cursor="pointer"
+    >
       <!-- Billboard Frame -->
       <Mesh castShadow receiveShadow>
         <BoxGeometry args={[6, 4, 0.2]} />
@@ -166,4 +170,5 @@
         position={[0, 3, 0]}
       />
     </group>
+  </RigidBody>
 {/each}

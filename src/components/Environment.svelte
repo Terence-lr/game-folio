@@ -1,7 +1,7 @@
 <script>
   import { Mesh, BoxGeometry, PlaneGeometry, CylinderGeometry, SphereGeometry } from '@threlte/core';
   import { MeshStandardMaterial } from 'three';
-  // Physics temporarily disabled for compatibility
+  import { RigidBody, Collider } from '@threlte/rapier';
   import { onMount } from 'svelte';
   
   // Materials
@@ -97,10 +97,13 @@
 </script>
 
 <!-- Main Ground -->
-<Mesh position={[0, -1, 0]} castShadow receiveShadow>
-  <BoxGeometry args={[50, 1, 50]} />
-  <MeshStandardMaterial attach="material" {...groundMaterial} />
-</Mesh>
+<RigidBody type="fixed" position={[0, -1, 0]}>
+  <Collider type="cuboid" args={[25, 0.5, 25]} />
+  <Mesh castShadow receiveShadow>
+    <BoxGeometry args={[50, 1, 50]} />
+    <MeshStandardMaterial attach="material" {...groundMaterial} />
+  </Mesh>
+</RigidBody>
 
 <!-- Procedural Terrain -->
 <Mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} castShadow receiveShadow>
@@ -109,10 +112,13 @@
 </Mesh>
 
 <!-- Water Body -->
-<Mesh position={[0, 0, 0]} castShadow receiveShadow>
-  <CylinderGeometry args={[15, 15, 0.5, 32]} />
-  <MeshStandardMaterial attach="material" {...waterMaterial} />
-</Mesh>
+<RigidBody type="fixed" position={[0, 0, 0]}>
+  <Collider type="cylinder" args={[15, 0.25]} />
+  <Mesh castShadow receiveShadow>
+    <CylinderGeometry args={[15, 15, 0.5, 32]} />
+    <MeshStandardMaterial attach="material" {...waterMaterial} />
+  </Mesh>
+</RigidBody>
 
 <!-- Grass Patches -->
 {#each Array(15) as _, i}
@@ -132,18 +138,25 @@
 
 <!-- Procedural Objects -->
 {#each proceduralObjects as obj}
-  <group position={obj.position}>
+  <RigidBody 
+    type="dynamic" 
+    position={obj.position} 
+    mass={obj.type === 'crystal' ? 0.5 : obj.type === 'rock' ? 2.0 : 5.0}
+  >
     {#if obj.type === 'crystal'}
+      <Collider type="cone" args={[0.5, 2]} />
       <Mesh castShadow receiveShadow>
         <ConeGeometry args={[0.5 + Math.random() * 1, 2 + Math.random() * 2, 6]} />
         <MeshStandardMaterial attach="material" {...obj.material} />
       </Mesh>
     {:else if obj.type === 'rock'}
+      <Collider type="ball" args={[0.5]} />
       <Mesh castShadow receiveShadow>
         <SphereGeometry args={[0.5 + Math.random() * 1, 8, 6]} />
         <MeshStandardMaterial attach="material" {...obj.material} />
       </Mesh>
     {:else if obj.type === 'tree'}
+      <Collider type="cuboid" args={[0.3, 2, 0.3]} />
       <group>
         <!-- Trunk -->
         <Mesh position={[0, 1, 0]} castShadow receiveShadow>
@@ -157,5 +170,5 @@
         </Mesh>
       </group>
     {/if}
-  </group>
+  </RigidBody>
 {/each}

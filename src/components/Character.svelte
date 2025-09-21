@@ -1,7 +1,7 @@
 <script>
   import { Mesh, Group, CylinderGeometry, SphereGeometry } from '@threlte/core';
   import { MeshStandardMaterial } from 'three';
-  // Physics temporarily disabled for compatibility
+  import { RigidBody, Collider, useRigidBody } from '@threlte/rapier';
   import { onMount, onDestroy } from 'svelte';
   // Animation temporarily disabled for compatibility
   
@@ -22,6 +22,7 @@
   let moveState = { forward: 0, strafe: 0, up: 0 };
   let isBoosting = false;
   let characterGroup;
+  let rigidBody;
   
   // Movement constants
   const baseSpeed = 10.0;
@@ -62,26 +63,26 @@
     window.removeEventListener('keyup', handleKeyUp);
   });
   
-  // Animation loop - simplified for now
+  // Physics-based animation loop
   onMount(() => {
     const animate = () => {
-      if (characterGroup) {
+      if (rigidBody && characterGroup) {
         const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
-        const speed = baseSpeed * speedMultiplier * 0.016; // ~60fps
+        const speed = baseSpeed * speedMultiplier;
         
         // Calculate movement direction
         const forward = new THREE.Vector3(0, 0, -moveState.forward);
         const strafe = new THREE.Vector3(moveState.strafe, 0, 0);
         const up = new THREE.Vector3(0, moveState.up, 0);
         
-        // Apply movement
+        // Apply movement using physics
         const movement = forward.add(strafe).add(up).multiplyScalar(speed);
-        characterGroup.position.add(movement);
+        rigidBody.setLinvel(movement, true);
         
         // Character rotation based on movement
         if (moveState.forward !== 0 || moveState.strafe !== 0) {
           const angle = Math.atan2(moveState.strafe, -moveState.forward);
-          characterGroup.rotation.y = angle;
+          rigidBody.setRotation({ x: 0, y: angle, z: 0, w: 1 }, true);
         }
       }
       requestAnimationFrame(animate);
@@ -90,7 +91,16 @@
   });
 </script>
 
-<group bind:this={characterGroup} position={[0, 2, 0]}>
+<RigidBody
+  bind:rigidBody
+  type="dynamic"
+  position={[0, 2, 0]}
+  mass={1.0}
+  linearDamping={0.1}
+  angularDamping={0.1}
+>
+  <Collider type="capsule" args={[0.5, 0.8]} />
+  <group bind:this={characterGroup}>
     <!-- Head -->
     <Mesh position={[0, 1.8, 0]} castShadow receiveShadow>
       <SphereGeometry args={[0.4, 8, 6]} />
@@ -137,4 +147,5 @@
       <SphereGeometry args={[0.05, 6, 4]} />
       <MeshStandardMaterial attach="material" color={0x000000} />
     </Mesh>
-</group>
+  </group>
+</RigidBody>

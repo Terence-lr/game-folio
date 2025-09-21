@@ -115,11 +115,13 @@
   </div>
   
   <div class="physics-info">
-    <h4>🔬 Physics Info</h4>
-    <p>Objects now have realistic physics!</p>
-    <p>• Gravity affects all objects</p>
-    <p>• Collision detection active</p>
-    <p>• Character has physics body</p>
+    <h4>🔬 Advanced Features Active</h4>
+    <p>✅ Rapier Physics Engine</p>
+    <p>✅ Theatre.js Animations</p>
+    <p>✅ VR/AR Support</p>
+    <p>✅ Custom GLSL Shaders</p>
+    <p>✅ Real-time Physics</p>
+    <p>✅ Interactive Billboards</p>
   </div>
 </div>
 

@@ -2,6 +2,9 @@
   import { onMount } from 'svelte';
   import { Canvas } from '@threlte/core';
   import { OrbitControls } from '@threlte/extras';
+  import { World, RigidBody, Collider } from '@threlte/rapier';
+  import XRSupport from './XRSupport.svelte';
+  import Animations from './Animations.svelte';
   
   export let canvas;
   
@@ -9,7 +12,7 @@
   
   onMount(() => {
     sceneReady = true;
-    console.log('3D Scene initialized with Threlte + Physics!');
+    console.log('3D Scene initialized with Threlte + Physics + XR + Animations!');
   });
 </script>
 
@@ -49,14 +52,22 @@
       }}
     ></directionalLight>
     
-    <!-- Environment -->
-    <Environment />
-    
-    <!-- Character -->
-    <Character />
-    
-    <!-- Portfolio Billboards -->
-    <PortfolioBillboards />
+    <!-- Physics World -->
+    <World
+      gravity={[0, -9.81, 0]}
+      debug={false}
+      paused={false}
+      timeStep={1/60}
+    >
+      <!-- Environment -->
+      <Environment />
+      
+      <!-- Character -->
+      <Character />
+      
+      <!-- Portfolio Billboards -->
+      <PortfolioBillboards />
+    </World>
     
     <!-- Controls -->
     <OrbitControls
@@ -66,6 +77,12 @@
       enablePan={true}
       enableRotate={true}
     ></OrbitControls>
+    
+    <!-- Animation System -->
+    <Animations />
+    
+    <!-- XR Support -->
+    <XRSupport />
     
     <!-- Physics-based 3D Portfolio with Rapier -->
   </Canvas>
