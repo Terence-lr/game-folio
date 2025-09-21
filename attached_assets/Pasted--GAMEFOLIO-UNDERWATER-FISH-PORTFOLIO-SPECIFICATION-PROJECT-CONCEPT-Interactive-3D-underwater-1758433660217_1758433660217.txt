@@ -1,0 +1,193 @@
+# GAMEFOLIO - UNDERWATER FISH PORTFOLIO SPECIFICATION
+
+## PROJECT CONCEPT
+
+Interactive 3D underwater world where users control a fish swimming through portfolio sections, discovering projects and skills through exploration.
+
+## MOBILE-FIRST CONTROL SYSTEM
+
+### Mobile Interface Layout:
+
+- **Virtual Joystick (Bottom Left)**: Fish swimming direction (360° movement)
+- **Boost Button (Bottom Right)**: Speed burst when held (visual pulse effect)
+- **Depth Controls (Right Side Stack)**:
+  - ▲ Surface/Swim Up
+  - ● Interact with objects
+  - ✕ Exit/Back
+  - ▼ Dive/Swim Down
+- **Touch & Drag**: Camera rotation around fish
+- **Pinch Gesture**: Zoom in/out
+- **Double Tap**: Quick interaction with nearest object
+
+### Desktop Controls:
+
+- Arrow Keys: Fish movement (forward, backward, left, right)
+- W/S: Swim up/down (depth control)
+- Space Bar: Speed boost
+- Mouse: Camera control
+- Click: Interact with portfolio elements
+- Tab: Cycle through interactive elements
+
+## UNDERWATER WORLD SECTIONS
+
+### 1. SURFACE ENTRY - “THE DIVE”
+
+- **Scene**: Ocean surface with sun rays penetrating water
+- **Introduction**: Animated fish character introduction
+- **Tutorial**: Control prompts appear as floating text bubbles
+- **Transition**: 3-second dive animation with depth blur effects
+- **Audio**: Splash sound transitioning to underwater ambiance
+
+### 2. INTRO REEF - “WELCOME WATERS”
+
+- **Environment**: Colorful coral reef with gentle current effects
+- **Bio Display**: Large coral formation housing personal info
+- **Interactive Elements**:
+  - Professional photo in giant clam shell (opens/closes)
+  - Name appears as school of fish forming letters
+  - Title floats as bioluminescent plankton
+- **Ambient Life**: Small fish swimming in patterns, swaying seaweed
+
+### 3. PROJECT KELP FOREST - “INNOVATION DEPTHS”
+
+- **Environment**: Tall kelp forest with dappled light filtering down
+- **Project Showcases**:
+  - **Job Tracker**: Sunken treasure chest (opens to reveal app preview)
+  - **Distance Converter**: Ancient artifact on pedestal
+  - **Future Projects**: Empty vessels waiting to be filled
+- **Tech Stack**: Colorful fish species representing different technologies
+  - React fish (blue with component-like fins)
+  - JavaScript fish (yellow with curly brackets pattern)
+  - Supabase fish (green with database-like scales)
+- **Navigation**: Swim-through tunnels leading to live project demos
+
+### 4. SKILLS CAVERN - “CRYSTAL CHAMBERS”
+
+- **Environment**: Underwater cave system with glowing crystals
+- **Skill Representation**:
+  - Programming languages as different colored crystals
+  - Brightness indicates proficiency level (1-10 scale)
+  - Crystal formations pulse when approached
+- **Interactive Demos**: Code snippets float in water bubbles
+- **Progress Tracking**: Skill growth animations when crystals are touched
+
+### 5. EXPERIENCE SHIPWRECK - “CAREER TIMELINE”
+
+- **Environment**: Massive shipwreck with multiple sections to explore
+- **Job History**: Different ship sections for each position
+  - Company logos on weathered ship flags
+  - Role details hidden in ship compartments
+  - Achievement unlocks by discovering all rooms
+- **Timeline Visualization**: Chain connecting ship sections
+- **Interactive Elements**: Ship’s wheel shows career progression
+
+### 6. CONTACT DEPTHS - “COMMUNICATION TRENCH”
+
+- **Environment**: Deep ocean trench with bioluminescent creatures
+- **Contact Methods**:
+  - Email as message-in-a-bottle
+  - LinkedIn as professional fishing net
+  - GitHub as code repository chest
+- **Resume Download**: Large pearl that opens to reveal resume
+- **Call-to-Action**: Glowing portal back to surface (“Let’s Connect”)
+
+## TECHNICAL SPECIFICATIONS
+
+### Performance Targets:
+
+- **Mobile**: 30fps minimum, 60fps optimal
+- **Desktop**: 60fps consistent
+- **Load Time**: <5 seconds on 3G connection
+- **Bundle Size**: <12MB total (optimized assets)
+
+### Technology Stack:
+
+- **3D Engine**: Three.js (r158+)
+- **Physics**: Simple kinematic movement (no complex physics)
+- **Audio**: Web Audio API for ambient underwater sounds
+- **Build Tool**: Vite for optimization
+- **Hosting**: Vercel with global CDN
+
+### Mobile Optimizations:
+
+- **Texture Compression**: WebP for 2D assets, compressed textures for 3D
+- **Level of Detail**: Multiple mesh resolutions based on distance
+- **Particle Reduction**: Fewer particles on mobile devices
+- **Battery Consideration**: Frame rate adaptation based on battery level
+
+### Fish Movement Physics:
+
+- **Swimming Animation**: Realistic fish tail movement and body undulation
+- **Momentum**: Gradual acceleration/deceleration for natural feel
+- **Turning**: Banking animation when changing direction
+- **Depth Effects**: Pressure simulation affecting movement speed
+- **Current Simulation**: Gentle environmental forces affecting navigation
+
+### Interactive System:
+
+- **Proximity Detection**: UI hints appear when fish approaches objects
+- **Focus System**: Clear visual indicators for interactive elements
+- **Feedback**: Haptic vibration on mobile for successful interactions
+- **Progress Tracking**: Completion indicators for each section explored
+
+### Accessibility Features:
+
+- **Alternative Navigation**: Keyboard-only mode with section jumping
+- **Screen Reader Support**: Hidden text descriptions for all visual elements
+- **Reduced Motion**: Option to disable animations and effects
+- **High Contrast**: Alternative color scheme for better visibility
+- **Voice Commands**: Optional voice navigation for supported browsers
+
+## SIGNATURE UX INTEGRATION
+
+### Terence Richardson Brand Elements:
+
+- **Color Palette**: Deep ocean blues with crimson accents on interactive elements
+- **Typography**: Clean sans-serif for UI overlays
+- **Spacing**: Generous water space between sections for comfortable navigation
+- **Performance**: Optimized for high Lighthouse scores even with 3D content
+
+### Unique Portfolio Features:
+
+- **Progressive Disclosure**: Information revealed through exploration rather than scrolling
+- **Memorable Experience**: Visitors remember the fish navigation concept
+- **Technical Showcase**: Demonstrates advanced web development skills
+- **Mobile Excellence**: Proves capability in responsive, touch-friendly interfaces
+
+## IMPLEMENTATION PHASES
+
+### Phase 1 - Core Navigation (Week 1):
+
+- Basic fish movement and camera controls
+- Underwater environment setup
+- Mobile control interface
+
+### Phase 2 - Content Integration (Week 2):
+
+- Portfolio sections with placeholder content
+- Interaction system
+- Navigation between areas
+
+### Phase 3 - Polish & Optimization (Week 3):
+
+- Visual effects and animations
+- Performance optimization
+- Cross-device testing
+
+### Phase 4 - Content Population (Week 4):
+
+- Real portfolio content integration
+- Final testing and deployment
+- Analytics implementation
+
+## SUCCESS METRICS
+
+- **Engagement**: Average session time >3 minutes
+- **Exploration**: 80% of visitors reach at least 3 sections
+- **Performance**: 90+ Lighthouse score on mobile
+- **Differentiation**: Memorable enough to be shared and discussed
+- **Professional Impact**: Demonstrates technical creativity and execution capability
+
+-----
+
+**Bottom Line**: Gamefolio positions you as a developer who can build engaging, complex web experiences while maintaining professional portfolio functionality. Perfect for standing out in a crowded market while showcasing advanced technical skills.
