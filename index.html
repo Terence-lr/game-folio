@@ -275,6 +275,7 @@
             justify-content: center;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
+            pointer-events: auto;
         }
 
         .start-screen-overlay.hidden {
@@ -369,6 +370,9 @@
             margin-top: 30px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(74, 144, 226, 0.4);
+            pointer-events: auto;
+            z-index: 1001;
+            position: relative;
         }
 
         .enter-world-btn:hover {
@@ -1568,20 +1572,89 @@
         const startScreenOverlay = document.getElementById('start-screen-overlay');
         const enterWorldButton = document.getElementById('enter-world-button');
         
-        enterWorldButton.addEventListener('click', () => {
-            // Hide start screen overlay
-            startScreenOverlay.classList.add('hidden');
+        // Debug: Check if elements exist
+        console.log('Start screen overlay:', startScreenOverlay);
+        console.log('Enter world button:', enterWorldButton);
+        
+        if (enterWorldButton) {
+            enterWorldButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Enter World button clicked!');
+                
+                // Hide start screen overlay
+                startScreenOverlay.classList.add('hidden');
+                console.log('Start screen overlay hidden');
+                
+                // Show main world
+                mainWorldGroup.visible = true;
+                showStartScreen = false;
+                console.log('Main world shown, showStartScreen set to false');
+                
+                // Hide start screen 3D elements
+                startScreenGroup.visible = false;
+                console.log('Start screen 3D elements hidden');
+                
+                // Start the main animation loop
+                animate();
+                console.log('Animation loop started');
+            });
             
-            // Show main world
-            mainWorldGroup.visible = true;
-            showStartScreen = false;
-            
-            // Hide start screen 3D elements
-            startScreenGroup.visible = false;
-            
-            // Start the main animation loop
-            animate();
-        });
+            // Also add touch event for mobile
+            enterWorldButton.addEventListener('touchend', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Enter World button touched!');
+                
+                // Hide start screen overlay
+                startScreenOverlay.classList.add('hidden');
+                console.log('Start screen overlay hidden');
+                
+                // Show main world
+                mainWorldGroup.visible = true;
+                showStartScreen = false;
+                console.log('Main world shown, showStartScreen set to false');
+                
+                // Hide start screen 3D elements
+                startScreenGroup.visible = false;
+                console.log('Start screen 3D elements hidden');
+                
+                // Start the main animation loop
+                animate();
+                console.log('Animation loop started');
+            });
+        } else {
+            console.error('Enter World button not found!');
+        }
+        
+        // Fallback: Add a simple test button if the main one doesn't work
+        setTimeout(() => {
+            if (!enterWorldButton || !enterWorldButton.addEventListener) {
+                console.log('Creating fallback button...');
+                const fallbackButton = document.createElement('button');
+                fallbackButton.textContent = 'ENTER WORLD (FALLBACK)';
+                fallbackButton.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    background: red;
+                    color: white;
+                    padding: 10px;
+                    border: none;
+                    cursor: pointer;
+                `;
+                fallbackButton.onclick = () => {
+                    console.log('Fallback button clicked!');
+                    startScreenOverlay.classList.add('hidden');
+                    mainWorldGroup.visible = true;
+                    showStartScreen = false;
+                    startScreenGroup.visible = false;
+                    animate();
+                };
+                document.body.appendChild(fallbackButton);
+            }
+        }, 2000);
 
         // --- OPTIMIZED MOVEMENT & CONTROL VARIABLES ---
         const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
