@@ -290,16 +290,21 @@
         .start-screen-content {
             text-align: center;
             color: white;
-            max-width: 600px;
-            padding: 40px;
+            max-width: 90vw;
+            width: 600px;
+            padding: 30px;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 20px;
             border: 2px solid rgba(135, 206, 235, 0.3);
             backdrop-filter: blur(10px);
+            margin: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            max-height: 90vh;
         }
 
         .start-title {
-            font-size: 3.5rem;
+            font-size: clamp(2rem, 8vw, 3.5rem);
             font-weight: bold;
             margin-bottom: 10px;
             background: linear-gradient(45deg, #87ceeb, #98d8e8, #a8e6cf);
@@ -311,10 +316,10 @@
             font-family: 'Courier New', monospace;
             text-transform: uppercase;
             border: 3px solid #87ceeb;
-            padding: 20px;
+            padding: 15px;
             background: rgba(0, 0, 0, 0.3);
             box-shadow: 0 0 30px rgba(135, 206, 235, 0.3);
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
 
         .start-subtitle {
@@ -1879,25 +1884,28 @@
                 enterWorldButton.textContent = 'ENTERING...';
                 enterWorldButton.style.background = 'linear-gradient(45deg, #ff6b35, #ff8c42)';
                 
-                // Small delay for visual feedback
-                setTimeout(() => {
-                    // Hide start screen overlay
-                    startScreenOverlay.classList.add('hidden');
-                    console.log('Start screen overlay hidden');
-                    
-                    // Show main world
-                    mainWorldGroup.visible = true;
-                    showStartScreen = false;
-                    console.log('Main world shown, showStartScreen set to false');
-                    
-                    // Hide start screen 3D elements
-                    startScreenGroup.visible = false;
-                    console.log('Start screen 3D elements hidden');
-                    
-                    // Start the main animation loop
-                    animate();
-                    console.log('Animation loop started');
-                }, 500);
+                // Immediate transition - no delay
+                // Hide start screen overlay
+                startScreenOverlay.classList.add('hidden');
+                console.log('Start screen overlay hidden');
+                
+                // Show main world
+                mainWorldGroup.visible = true;
+                showStartScreen = false;
+                console.log('Main world shown, showStartScreen set to false');
+                
+                // Hide start screen 3D elements
+                startScreenGroup.visible = false;
+                console.log('Start screen 3D elements hidden');
+                
+                // Ensure camera is positioned correctly for main world
+                camera.position.set(0, 4, 12);
+                camera.lookAt(0, 0, 0);
+                console.log('Camera positioned for main world');
+                
+                // Start the main animation loop
+                animate();
+                console.log('Animation loop started');
             });
             
             // Also add touch event for mobile
@@ -1910,25 +1918,28 @@
                 enterWorldButton.textContent = 'ENTERING...';
                 enterWorldButton.style.background = 'linear-gradient(45deg, #ff6b35, #ff8c42)';
                 
-                // Small delay for visual feedback
-                setTimeout(() => {
-                    // Hide start screen overlay
-                    startScreenOverlay.classList.add('hidden');
-                    console.log('Start screen overlay hidden');
-                    
-                    // Show main world
-                    mainWorldGroup.visible = true;
-                    showStartScreen = false;
-                    console.log('Main world shown, showStartScreen set to false');
-                    
-                    // Hide start screen 3D elements
-                    startScreenGroup.visible = false;
-                    console.log('Start screen 3D elements hidden');
-                    
-                    // Start the main animation loop
-                    animate();
-                    console.log('Animation loop started');
-                }, 500);
+                // Immediate transition - no delay
+                // Hide start screen overlay
+                startScreenOverlay.classList.add('hidden');
+                console.log('Start screen overlay hidden');
+                
+                // Show main world
+                mainWorldGroup.visible = true;
+                showStartScreen = false;
+                console.log('Main world shown, showStartScreen set to false');
+                
+                // Hide start screen 3D elements
+                startScreenGroup.visible = false;
+                console.log('Start screen 3D elements hidden');
+                
+                // Ensure camera is positioned correctly for main world
+                camera.position.set(0, 4, 12);
+                camera.lookAt(0, 0, 0);
+                console.log('Camera positioned for main world');
+                
+                // Start the main animation loop
+                animate();
+                console.log('Animation loop started');
             });
         } else {
             console.error('Enter World button not found!');
@@ -1957,11 +1968,27 @@
                     mainWorldGroup.visible = true;
                     showStartScreen = false;
                     startScreenGroup.visible = false;
+                    camera.position.set(0, 4, 12);
+                    camera.lookAt(0, 0, 0);
                     animate();
                 };
                 document.body.appendChild(fallbackButton);
             }
         }, 2000);
+        
+        // Add keyboard shortcut to enter world (Enter key)
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && showStartScreen) {
+                console.log('Enter key pressed to enter world!');
+                startScreenOverlay.classList.add('hidden');
+                mainWorldGroup.visible = true;
+                showStartScreen = false;
+                startScreenGroup.visible = false;
+                camera.position.set(0, 4, 12);
+                camera.lookAt(0, 0, 0);
+                animate();
+            }
+        });
 
         // --- OPTIMIZED MOVEMENT & CONTROL VARIABLES ---
         const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
