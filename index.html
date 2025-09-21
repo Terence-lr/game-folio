@@ -340,7 +340,7 @@
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0xff8c42, 0.01); // Orange fog like Bruno Simon
+        scene.fog = new THREE.FogExp2(0x0a0a2e, 0.005); // Deep blue night fog
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
@@ -374,34 +374,38 @@
             controls.target.set(0, 0, 0); // Camera will orbit a central point
         }
 
-        // --- LOW-POLY WORLD LIGHTING ---
-        // Warm ambient light for low-poly world
-        const ambientLight = new THREE.AmbientLight(0xff8c42, 0.8);
+        // --- STARRY NIGHT LIGHTING ---
+        // Cool ambient light for night atmosphere
+        const ambientLight = new THREE.AmbientLight(0x1a1a3a, 0.4);
         scene.add(ambientLight);
         
-        // Main directional light (sun)
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
-        sunLight.position.set(10, 20, 5);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.near = 0.5;
-        sunLight.shadow.camera.far = 100;
-        sunLight.shadow.camera.left = -30;
-        sunLight.shadow.camera.right = 30;
-        sunLight.shadow.camera.top = 30;
-        sunLight.shadow.camera.bottom = -30;
-        sunLight.shadow.bias = -0.0001;
-        scene.add(sunLight);
+        // Moonlight (soft directional light)
+        const moonLight = new THREE.DirectionalLight(0x87ceeb, 0.8);
+        moonLight.position.set(5, 30, 10);
+        moonLight.castShadow = true;
+        moonLight.shadow.mapSize.width = 2048;
+        moonLight.shadow.mapSize.height = 2048;
+        moonLight.shadow.camera.near = 0.5;
+        moonLight.shadow.camera.far = 100;
+        moonLight.shadow.camera.left = -30;
+        moonLight.shadow.camera.right = 30;
+        moonLight.shadow.camera.top = 30;
+        moonLight.shadow.camera.bottom = -30;
+        moonLight.shadow.bias = -0.0001;
+        scene.add(moonLight);
         
-        // Accent lights for the low-poly world
-        const accentLight1 = new THREE.PointLight(0xff6b35, 1.0, 20);
-        accentLight1.position.set(-10, 5, -10);
-        scene.add(accentLight1);
+        // Starry accent lights
+        const starLight1 = new THREE.PointLight(0x87ceeb, 1.2, 25);
+        starLight1.position.set(-15, 8, -15);
+        scene.add(starLight1);
         
-        const accentLight2 = new THREE.PointLight(0xff8c42, 0.8, 15);
-        accentLight2.position.set(10, 3, 10);
-        scene.add(accentLight2);
+        const starLight2 = new THREE.PointLight(0x98d8e8, 1.0, 20);
+        starLight2.position.set(15, 6, 15);
+        scene.add(starLight2);
+        
+        const starLight3 = new THREE.PointLight(0xa8e6cf, 0.8, 18);
+        starLight3.position.set(0, 10, -20);
+        scene.add(starLight3);
 
         // --- GOD RAYS (VOLUMETRIC LIGHTING EFFECT) ---
         const godraysEffect = new THREE.Group();
@@ -444,12 +448,12 @@
         }
         scene.add(godraysEffect);
 
-        // --- ENHANCED ENVIRONMENT ---
-        // Low-poly ground with platforms
+        // --- NATURAL NIGHT ENVIRONMENT ---
+        // Main ground with grass texture
         const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff8c42,
-            roughness: 0.8,
-            metalness: 0.1
+            color: 0x2d5016,
+            roughness: 0.9,
+            metalness: 0.0
         });
         
         // Main ground platform
@@ -461,124 +465,139 @@
         mainGround.receiveShadow = true;
         scene.add(mainGround);
         
-        // Additional platforms like Bruno Simon site
-        const platformMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff,
-            roughness: 0.6,
-            metalness: 0.2
+        // Water body
+        const waterMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1e3a8a,
+            roughness: 0.1,
+            metalness: 0.8,
+            transparent: true,
+            opacity: 0.8
         });
         
-        // Platform 1
-        const platform1 = new THREE.Mesh(
-            new THREE.BoxGeometry(8, 0.5, 8),
-            platformMaterial
+        const water = new THREE.Mesh(
+            new THREE.CylinderGeometry(8, 8, 0.2, 16),
+            waterMaterial
         );
-        platform1.position.set(-15, 0, -10);
-        platform1.receiveShadow = true;
-        scene.add(platform1);
+        water.position.set(-20, 0, -20);
+        water.rotation.x = -Math.PI / 2;
+        water.receiveShadow = true;
+        scene.add(water);
         
-        // Platform 2
-        const platform2 = new THREE.Mesh(
-            new THREE.BoxGeometry(6, 0.5, 6),
-            platformMaterial
-        );
-        platform2.position.set(15, 0, 10);
-        platform2.receiveShadow = true;
-        scene.add(platform2);
-        
-        // Platform 3
-        const platform3 = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 0.5, 4),
-            platformMaterial
-        );
-        platform3.position.set(0, 0, -20);
-        platform3.receiveShadow = true;
-        scene.add(platform3);
-        
-        // Low-poly objects like Bruno Simon site
-        const objectMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff6b35,
-            roughness: 0.7,
-            metalness: 0.1
+        // Grass patches
+        const grassMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a7c59,
+            roughness: 0.8,
+            metalness: 0.0
         });
         
-        // Low-poly blocks scattered around
-        for (let i = 0; i < 15; i++) {
-            const block = new THREE.Mesh(
-                new THREE.BoxGeometry(
-                    Math.random() * 2 + 1,
-                    Math.random() * 2 + 1,
-                    Math.random() * 2 + 1
-                ), 
-                objectMaterial
+        for (let i = 0; i < 20; i++) {
+            const grass = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.3, 0.8, 6),
+                grassMaterial
             );
-            block.position.set(
+            grass.position.set(
                 (Math.random() - 0.5) * 40,
-                Math.random() * 2,
+                0.4,
                 (Math.random() - 0.5) * 40
             );
-            block.rotation.set(
-                Math.random() * Math.PI * 0.5,
-                Math.random() * Math.PI * 0.5,
-                Math.random() * Math.PI * 0.5
-            );
-            block.castShadow = true;
-            block.receiveShadow = true;
-            scene.add(block);
+            grass.rotation.z = (Math.random() - 0.5) * 0.3;
+            grass.castShadow = true;
+            grass.receiveShadow = true;
+            scene.add(grass);
         }
         
-        // Low-poly pyramids
-        const pyramidMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff9f43,
-            roughness: 0.6,
-            metalness: 0.2
-        });
-        
-        for (let i = 0; i < 8; i++) {
-            const pyramid = new THREE.Mesh(
-                new THREE.ConeGeometry(1.5, 3, 4),
-                pyramidMaterial
-            );
-            pyramid.position.set(
-                (Math.random() - 0.5) * 30,
-                1.5,
-                (Math.random() - 0.5) * 30
-            );
-            pyramid.rotation.y = Math.random() * Math.PI;
-            pyramid.castShadow = true;
-            pyramid.receiveShadow = true;
-            scene.add(pyramid);
-        }
-        
-        // Low-poly trees/plants
-        const treeMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x4a7c59,
+        // Night-themed decorative objects
+        const rockMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a4a4a,
             roughness: 0.8,
             metalness: 0.1
         });
         
+        // Rocks scattered around
         for (let i = 0; i < 12; i++) {
+            const rock = new THREE.Mesh(
+                new THREE.SphereGeometry(
+                    Math.random() * 1.5 + 0.5,
+                    8, 6
+                ), 
+                rockMaterial
+            );
+            rock.position.set(
+                (Math.random() - 0.5) * 35,
+                Math.random() * 1,
+                (Math.random() - 0.5) * 35
+            );
+            rock.scale.set(
+                1 + Math.random() * 0.5,
+                0.5 + Math.random() * 0.8,
+                1 + Math.random() * 0.5
+            );
+            rock.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                Math.random() * Math.PI
+            );
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            scene.add(rock);
+        }
+        
+        // Glowing crystals
+        const crystalMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x87ceeb,
+            roughness: 0.2,
+            metalness: 0.8,
+            emissive: 0x1a3a5c,
+            emissiveIntensity: 0.3
+        });
+        
+        for (let i = 0; i < 6; i++) {
+            const crystal = new THREE.Mesh(
+                new THREE.ConeGeometry(0.8, 2, 6),
+                crystalMaterial
+            );
+            crystal.position.set(
+                (Math.random() - 0.5) * 25,
+                1,
+                (Math.random() - 0.5) * 25
+            );
+            crystal.rotation.y = Math.random() * Math.PI;
+            crystal.castShadow = true;
+            crystal.receiveShadow = true;
+            scene.add(crystal);
+        }
+        
+        // Night trees with glowing leaves
+        const trunkMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3a3a3a,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        for (let i = 0; i < 8; i++) {
             // Tree trunk
             const trunk = new THREE.Mesh(
                 new THREE.CylinderGeometry(0.3, 0.4, 4, 6),
-                treeMaterial
+                trunkMaterial
             );
             trunk.position.set(
-                (Math.random() - 0.5) * 35,
+                (Math.random() - 0.5) * 30,
                 2,
-                (Math.random() - 0.5) * 35
+                (Math.random() - 0.5) * 30
             );
             trunk.castShadow = true;
             trunk.receiveShadow = true;
             scene.add(trunk);
             
-            // Tree top
+            // Glowing tree top
             const treeTop = new THREE.Mesh(
                 new THREE.SphereGeometry(2, 6, 4),
                 new THREE.MeshStandardMaterial({ 
-                    color: 0x2d5016,
-                    roughness: 0.9,
-                    metalness: 0.0
+                    color: 0x98d8e8,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    emissive: 0x1a3a5c,
+                    emissiveIntensity: 0.2
                 })
             );
             treeTop.position.set(
@@ -591,41 +610,43 @@
             scene.add(treeTop);
         }
         
-        // Low-poly decorative objects
-        const decorMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff6b6b,
-            roughness: 0.7,
-            metalness: 0.1
+        // Glowing mushrooms
+        const mushroomMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xa8e6cf,
+            roughness: 0.6,
+            metalness: 0.1,
+            emissive: 0x2d5016,
+            emissiveIntensity: 0.2
         });
         
-        for (let i = 0; i < 15; i++) {
-            const decor = new THREE.Mesh(
-                new THREE.ConeGeometry(0.5 + Math.random() * 1, 2 + Math.random() * 2, 6),
-                decorMaterial
+        for (let i = 0; i < 10; i++) {
+            const mushroom = new THREE.Mesh(
+                new THREE.ConeGeometry(0.3 + Math.random() * 0.5, 1 + Math.random() * 1, 6),
+                mushroomMaterial
             );
-            decor.position.set(
-                (Math.random() - 0.5) * 30,
-                1,
-                (Math.random() - 0.5) * 30
+            mushroom.position.set(
+                (Math.random() - 0.5) * 25,
+                0.5,
+                (Math.random() - 0.5) * 25
             );
-            decor.rotation.set(
-                (Math.random() - 0.5) * 0.3,
+            mushroom.rotation.set(
+                (Math.random() - 0.5) * 0.2,
                 Math.random() * Math.PI * 2,
-                (Math.random() - 0.5) * 0.3
+                (Math.random() - 0.5) * 0.2
             );
-            decor.castShadow = true;
-            decor.receiveShadow = true;
-            scene.add(decor);
+            mushroom.castShadow = true;
+            mushroom.receiveShadow = true;
+            scene.add(mushroom);
         }
 
         // --- LOW-POLY PERSON CHARACTER ---
         const personGroup = new THREE.Group();
         
-        // Low-poly person material
+        // Low-poly person material for night theme
         const personMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xffb366,
-            metalness: 0.1,
-            roughness: 0.8
+            color: 0x6b7280,
+            metalness: 0.2,
+            roughness: 0.7
         });
         
         // Head
@@ -723,87 +744,74 @@
         particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
         
         const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
-            color: 0xff8c42,
-            size: 0.3,
+            color: 0x87ceeb,
+            size: 0.4,
             transparent: true,
-            opacity: 0.7,
+            opacity: 0.8,
             blending: THREE.AdditiveBlending,
             sizeAttenuation: true
         }));
         scene.add(particles);
         
 
-        // --- PORTFOLIO ITEMS ---
+        // --- INTERACTIVE BILLBOARDS ---
         const portfolioItems = [];
-        const portfolioItemData = [
-             { type: 'computer', pos: new THREE.Vector3(-15, 1, -10), color: 0x4a90e2, title: "Portfolio Website", desc: "The very site you are exploring now! Built with Three.js to create an interactive experience.", link: "https://github.com/Terence-lr/Portfolio-site" },
-             { type: 'building', pos: new THREE.Vector3(15, 1, 10), color: 0x8B4513, title: "Total Job Tracker", desc: "A full-stack application to help users track their job applications from start to finish.", link: "https://github.com/Terence-lr/total-job-tracker-" },
-             { type: 'tower', pos: new THREE.Vector3(0, 1, -20), color: 0x778899, title: "Distance Converter", desc: "A handy utility tool for converting various units of distance, built with clean UI principles.", link: "https://github.com/Terence-lr/distance-converter" },
-             { type: 'house', pos: new THREE.Vector3(0, 1, 20), color: 0x5d4a44, title: "My GitHub Profile", desc: "Explore all my other projects and contributions. Let's connect!", link: "https://github.com/Terence-lr" },
+        const billboardData = [
+             { pos: new THREE.Vector3(-15, 2, -10), title: "PORTFOLIO WEBSITE", subtitle: "THREE.JS INTERACTIVE", color: 0x4a90e2, desc: "The very site you are exploring now! Built with Three.js to create an interactive experience.", link: "https://github.com/Terence-lr/Portfolio-site" },
+             { pos: new THREE.Vector3(15, 2, 10), title: "JOB TRACKER", subtitle: "FULL-STACK APP", color: 0x8B4513, desc: "A full-stack application to help users track their job applications from start to finish.", link: "https://github.com/Terence-lr/total-job-tracker-" },
+             { pos: new THREE.Vector3(0, 2, -20), title: "DISTANCE CONVERTER", subtitle: "UTILITY TOOL", color: 0x778899, desc: "A handy utility tool for converting various units of distance, built with clean UI principles.", link: "https://github.com/Terence-lr/distance-converter" },
+             { pos: new THREE.Vector3(0, 2, 20), title: "GITHUB PROFILE", subtitle: "MY PROJECTS", color: 0x5d4a44, desc: "Explore all my other projects and contributions. Let's connect!", link: "https://github.com/Terence-lr" },
         ];
         
-        portfolioItemData.forEach(data => {
+        billboardData.forEach(data => {
             const group = new THREE.Group();
-            const material = new THREE.MeshStandardMaterial({ color: data.color, metalness: 0.2, roughness: 0.8 });
-
-            if (data.type === 'computer') {
-                // Low-poly computer
-                const monitor = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 0.3), material);
-                monitor.position.y = 1;
-                monitor.castShadow = true;
-                monitor.receiveShadow = true;
-                group.add(monitor);
-                
-                const stand = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 1), material);
-                stand.position.y = 0.25;
-                stand.castShadow = true;
-                stand.receiveShadow = true;
-                group.add(stand);
-                
-                const pointLight = new THREE.PointLight(data.color, 2, 15);
-                group.add(pointLight);
-                data.light = pointLight;
-            } else if (data.type === 'building') {
-                // Low-poly building
-                const base = new THREE.Mesh(new THREE.BoxGeometry(3, 4, 3), material);
-                base.position.y = 2;
-                base.castShadow = true;
-                base.receiveShadow = true;
-                group.add(base);
-                
-                const roof = new THREE.Mesh(new THREE.ConeGeometry(2.5, 2, 4), material);
-                roof.position.y = 5;
-                roof.castShadow = true;
-                roof.receiveShadow = true;
-                group.add(roof);
-            } else if (data.type === 'tower') {
-                // Low-poly tower
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 2, 6, 8), material);
-                base.position.y = 3;
-                base.castShadow = true;
-                base.receiveShadow = true;
-                group.add(base);
-                
-                const top = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3, 8), material);
-                top.position.y = 7.5;
-                top.castShadow = true;
-                top.receiveShadow = true;
-                group.add(top);
-            } else if (data.type === 'house') {
-                // Low-poly house
-                const base = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), material);
-                base.position.y = 1.5;
-                base.castShadow = true;
-                base.receiveShadow = true;
-                group.add(base);
-                
-                const roof = new THREE.Mesh(new THREE.ConeGeometry(3, 2, 4), material);
-                roof.position.y = 4;
-                roof.rotation.y = Math.PI / 4;
-                roof.castShadow = true;
-                roof.receiveShadow = true;
-                group.add(roof);
-            }
+            
+            // Billboard frame
+            const frameMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2a2a2a, 
+                metalness: 0.8, 
+                roughness: 0.2 
+            });
+            
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 0.2), frameMaterial);
+            frame.position.y = 2;
+            frame.castShadow = true;
+            frame.receiveShadow = true;
+            group.add(frame);
+            
+            // Billboard screen
+            const screenMaterial = new THREE.MeshStandardMaterial({ 
+                color: data.color, 
+                metalness: 0.1, 
+                roughness: 0.3,
+                emissive: data.color,
+                emissiveIntensity: 0.1
+            });
+            
+            const screen = new THREE.Mesh(new THREE.BoxGeometry(5.5, 3.5, 0.1), screenMaterial);
+            screen.position.y = 2;
+            screen.position.z = 0.1;
+            group.add(screen);
+            
+            // Billboard stand
+            const standMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a1a, 
+                metalness: 0.6, 
+                roughness: 0.4 
+            });
+            
+            const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2, 8), standMaterial);
+            stand.position.y = 1;
+            stand.castShadow = true;
+            stand.receiveShadow = true;
+            group.add(stand);
+            
+            // Glowing light
+            const pointLight = new THREE.PointLight(data.color, 3, 20);
+            pointLight.position.y = 3;
+            group.add(pointLight);
+            data.light = pointLight;
+            
             group.position.copy(data.pos);
             scene.add(group);
             portfolioItems.push({ ...data, mesh: group });
