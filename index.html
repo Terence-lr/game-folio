@@ -399,11 +399,6 @@
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loading-screen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Diving into the depths...</div>
-    </div>
 
     <canvas id="bg"></canvas>
 
@@ -424,12 +419,6 @@
             </div>
         </div>
         
-        <div id="instructions-panel" class="info-panel visible">
-            <h2>Welcome to Gamefolio</h2>
-            <p><strong>Desktop:</strong> <strong>W</strong> forward, <strong>S</strong> backward, <strong>A/D</strong> left/right, <strong>Q/E</strong> up/down, <strong>Space</strong> boost. Use <strong>mouse drag</strong> to rotate camera.</p>
-            <p><strong>Mobile:</strong> Use joystick, side buttons for depth, and boost button. <strong>Touch & drag</strong> to rotate camera.</p>
-            <button id="start-button">Explore</button>
-        </div>
         
         <div id="start-screen-overlay" class="start-screen-overlay visible">
             <div class="start-screen-content">
@@ -517,6 +506,15 @@
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
+        
+        // Add a simple start screen indicator
+        console.log('Start screen initialized, showStartScreen:', showStartScreen);
+        
+        // Set initial camera position for start screen
+        if (showStartScreen) {
+            camera.position.set(0, 2, 10);
+            camera.lookAt(0, 0, 0);
+        }
 
         // Font loading for 3D text
         const fontLoader = new FontLoader();
@@ -765,6 +763,14 @@
             sizeAttenuation: true
         }));
         startScreenGroup.add(startParticles);
+        
+        // Add lighting for start screen
+        const startAmbientLight = new THREE.AmbientLight(0xffffff, 1.0);
+        scene.add(startAmbientLight);
+        
+        const startDirectionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        startDirectionalLight.position.set(10, 10, 5);
+        scene.add(startDirectionalLight);
         
         scene.add(startScreenGroup);
 
@@ -1594,8 +1600,6 @@
         }
         
         // --- UI PANELS ---
-        const instructionsPanel = document.getElementById('instructions-panel');
-        document.getElementById('start-button').addEventListener('click', () => instructionsPanel.classList.remove('visible'));
         const portfolioPanel = document.getElementById('portfolio-info-panel');
         const portfolioTitle = document.getElementById('portfolio-title');
         const portfolioDesc = document.getElementById('portfolio-description');
@@ -1612,9 +1616,9 @@
             // Only animate main world if not on start screen
             if (showStartScreen) {
                 // Animate start screen elements
-                startParticles.rotation.y += deltaTime * 0.1;
-                startBillboardGroup.rotation.y += deltaTime * 0.05;
-                startPersonGroup.rotation.y += deltaTime * 0.2;
+                if (startParticles) startParticles.rotation.y += deltaTime * 0.1;
+                if (startBillboardGroup) startBillboardGroup.rotation.y += deltaTime * 0.05;
+                if (startPersonGroup) startPersonGroup.rotation.y += deltaTime * 0.2;
                 
                 renderer.render(scene, camera);
                 return;
