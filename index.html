@@ -262,6 +262,121 @@
             z-index: 100;
         }
 
+        /* Start Screen Overlay */
+        .start-screen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a2e 0%, #1a3a5c 50%, #2d5016 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .start-screen-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .start-screen-content {
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            border: 2px solid rgba(135, 206, 235, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .start-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #87ceeb, #98d8e8, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(135, 206, 235, 0.5);
+        }
+
+        .start-subtitle {
+            font-size: 1.2rem;
+            color: #98d8e8;
+            margin-bottom: 30px;
+        }
+
+        .start-character-info,
+        .start-controls-guide,
+        .start-billboard-info {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(26, 58, 92, 0.3);
+            border-radius: 15px;
+            border: 1px solid rgba(135, 206, 235, 0.2);
+        }
+
+        .start-character-info h3,
+        .start-controls-guide h3,
+        .start-billboard-info h3 {
+            color: #87ceeb;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .controls-visual {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid rgba(135, 206, 235, 0.3);
+        }
+
+        .control-key {
+            background: linear-gradient(45deg, #4a90e2, #87ceeb);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        .enter-world-btn {
+            background: linear-gradient(45deg, #4a90e2, #87ceeb);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .enter-world-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(74, 144, 226, 0.6);
+            background: linear-gradient(45deg, #87ceeb, #98d8e8);
+        }
+
         /* Performance optimizations */
         * {
             -webkit-tap-highlight-color: transparent;
@@ -316,6 +431,59 @@
             <button id="start-button">Explore</button>
         </div>
         
+        <div id="start-screen-overlay" class="start-screen-overlay visible">
+            <div class="start-screen-content">
+                <h1 class="start-title">GAMEFOLIO</h1>
+                <p class="start-subtitle">Interactive 3D Portfolio Experience</p>
+                
+                <div class="start-character-info">
+                    <h3>Your Character</h3>
+                    <p>You are the explorer in this starry night world. Use the controls below to navigate through my portfolio projects.</p>
+                </div>
+                
+                <div class="start-controls-guide">
+                    <h3>Controls</h3>
+                    <div class="controls-visual">
+                        <div class="control-row">
+                            <div class="control-key">W</div>
+                            <span>Forward</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">S</div>
+                            <span>Backward</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">A</div>
+                            <span>Left</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">D</div>
+                            <span>Right</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">Q</div>
+                            <span>Up</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">E</div>
+                            <span>Down</span>
+                        </div>
+                        <div class="control-row">
+                            <div class="control-key">SPACE</div>
+                            <span>Boost</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="start-billboard-info">
+                    <h3>Interactive Billboards</h3>
+                    <p>Explore the glowing billboards to discover my projects. Each one represents a different portfolio piece with detailed information.</p>
+                </div>
+                
+                <button id="enter-world-button" class="enter-world-btn">Enter World</button>
+            </div>
+        </div>
+        
         <div id="portfolio-info-panel" class="info-panel">
             <h2 id="portfolio-title">Portfolio Section</h2>
             <p id="portfolio-description">This is where the project description will go.</p>
@@ -341,9 +509,257 @@
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x0a0a2e, 0.005); // Deep blue night fog
+        
+        // Start screen flag
+        let showStartScreen = true;
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
+
+        // --- START SCREEN SETUP ---
+        const startScreenGroup = new THREE.Group();
+        
+        // Start screen ground
+        const startGroundMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1a3a5c,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        const startGround = new THREE.Mesh(
+            new THREE.BoxGeometry(30, 1, 30),
+            startGroundMaterial
+        );
+        startGround.position.y = -1;
+        startGround.receiveShadow = true;
+        startScreenGroup.add(startGround);
+        
+        // Start screen grass patches
+        const startGrassMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2d5016,
+            roughness: 0.8,
+            metalness: 0.0
+        });
+        
+        for (let i = 0; i < 15; i++) {
+            const grass = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.3, 0.8, 6),
+                startGrassMaterial
+            );
+            grass.position.set(
+                (Math.random() - 0.5) * 25,
+                0.4,
+                (Math.random() - 0.5) * 25
+            );
+            grass.rotation.z = (Math.random() - 0.5) * 0.3;
+            grass.castShadow = true;
+            grass.receiveShadow = true;
+            startScreenGroup.add(grass);
+        }
+        
+        // Start screen trees
+        const startTrunkMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3a3a3a,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        for (let i = 0; i < 6; i++) {
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.3, 0.4, 4, 6),
+                startTrunkMaterial
+            );
+            trunk.position.set(
+                (Math.random() - 0.5) * 20,
+                2,
+                (Math.random() - 0.5) * 20
+            );
+            trunk.castShadow = true;
+            trunk.receiveShadow = true;
+            startScreenGroup.add(trunk);
+            
+            const treeTop = new THREE.Mesh(
+                new THREE.SphereGeometry(2, 6, 4),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x98d8e8,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    emissive: 0x1a3a5c,
+                    emissiveIntensity: 0.2
+                })
+            );
+            treeTop.position.set(
+                trunk.position.x,
+                5,
+                trunk.position.z
+            );
+            treeTop.castShadow = true;
+            treeTop.receiveShadow = true;
+            startScreenGroup.add(treeTop);
+        }
+        
+        // Start screen billboard
+        const startBillboardGroup = new THREE.Group();
+        
+        // Billboard frame
+        const startFrameMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2a2a2a, 
+            metalness: 0.8, 
+            roughness: 0.2 
+        });
+        
+        const startFrame = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 0.2), startFrameMaterial);
+        startFrame.position.y = 2.5;
+        startFrame.castShadow = true;
+        startFrame.receiveShadow = true;
+        startBillboardGroup.add(startFrame);
+        
+        // Billboard screen
+        const startScreenMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a90e2, 
+            metalness: 0.1, 
+            roughness: 0.3,
+            emissive: 0x4a90e2,
+            emissiveIntensity: 0.2
+        });
+        
+        const startScreen = new THREE.Mesh(new THREE.BoxGeometry(7.5, 4.5, 0.1), startScreenMaterial);
+        startScreen.position.y = 2.5;
+        startScreen.position.z = 0.1;
+        startBillboardGroup.add(startScreen);
+        
+        // Billboard stand
+        const startStandMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1a1a1a, 
+            metalness: 0.6, 
+            roughness: 0.4 
+        });
+        
+        const startStand = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2.5, 8), startStandMaterial);
+        startStand.position.y = 1.25;
+        startStand.castShadow = true;
+        startStand.receiveShadow = true;
+        startBillboardGroup.add(startStand);
+        
+        // Billboard light
+        const startBillboardLight = new THREE.PointLight(0x4a90e2, 4, 25);
+        startBillboardLight.position.y = 4;
+        startBillboardGroup.add(startBillboardLight);
+        
+        startBillboardGroup.position.set(0, 0, -8);
+        startScreenGroup.add(startBillboardGroup);
+        
+        // Start screen character (person)
+        const startPersonGroup = new THREE.Group();
+        
+        const startPersonMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x6b7280,
+            metalness: 0.2,
+            roughness: 0.7
+        });
+        
+        // Head
+        const startHead = new THREE.Mesh(
+            new THREE.SphereGeometry(0.4, 8, 6),
+            startPersonMaterial
+        );
+        startHead.position.y = 1.2;
+        startHead.castShadow = true;
+        startPersonGroup.add(startHead);
+        
+        // Body
+        const startBody = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 1.0, 0.4),
+            startPersonMaterial
+        );
+        startBody.position.y = 0.3;
+        startBody.castShadow = true;
+        startPersonGroup.add(startBody);
+        
+        // Arms
+        const startLeftArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            startPersonMaterial
+        );
+        startLeftArm.position.set(-0.5, 0.2, 0);
+        startLeftArm.castShadow = true;
+        startPersonGroup.add(startLeftArm);
+        
+        const startRightArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            startPersonMaterial
+        );
+        startRightArm.position.set(0.5, 0.2, 0);
+        startRightArm.castShadow = true;
+        startPersonGroup.add(startRightArm);
+        
+        // Legs
+        const startLegMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x4a4a4a,
+            metalness: 0.1,
+            roughness: 0.8
+        });
+        
+        const startLeftLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            startLegMaterial
+        );
+        startLeftLeg.position.set(-0.2, -0.6, 0);
+        startLeftLeg.castShadow = true;
+        startPersonGroup.add(startLeftLeg);
+        
+        const startRightLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, 0.8, 0.2),
+            startLegMaterial
+        );
+        startRightLeg.position.set(0.2, -0.6, 0);
+        startRightLeg.castShadow = true;
+        startPersonGroup.add(startRightLeg);
+        
+        // Eyes
+        const startEyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const startLeftEye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), startEyeMaterial);
+        startLeftEye.position.set(-0.1, 1.3, 0.3);
+        startPersonGroup.add(startLeftEye);
+        
+        const startRightEye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), startEyeMaterial);
+        startRightEye.position.set(0.1, 1.3, 0.3);
+        startPersonGroup.add(startRightEye);
+        
+        startPersonGroup.position.set(0, 0, 5);
+        startScreenGroup.add(startPersonGroup);
+        
+        // Start screen particles
+        const startParticleCount = 20;
+        const startParticleGeometry = new THREE.BufferGeometry();
+        const startParticlePositions = new Float32Array(startParticleCount * 3);
+        const startParticleSizes = new Float32Array(startParticleCount);
+        
+        for (let i = 0; i < startParticleCount; i++) {
+            startParticlePositions[i * 3] = (Math.random() - 0.5) * 30;
+            startParticlePositions[i * 3 + 1] = Math.random() * 8 + 2;
+            startParticlePositions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+            startParticleSizes[i] = Math.random() * 0.4 + 0.2;
+        }
+        
+        startParticleGeometry.setAttribute('position', new THREE.BufferAttribute(startParticlePositions, 3));
+        startParticleGeometry.setAttribute('size', new THREE.BufferAttribute(startParticleSizes, 1));
+        
+        const startParticles = new THREE.Points(startParticleGeometry, new THREE.PointsMaterial({
+            color: 0x87ceeb,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
+        }));
+        startScreenGroup.add(startParticles);
+        
+        scene.add(startScreenGroup);
+
+        // --- MAIN WORLD GROUP (initially hidden) ---
+        const mainWorldGroup = new THREE.Group();
+        mainWorldGroup.visible = false;
 
         const renderer = new THREE.WebGLRenderer({
             canvas: document.querySelector('#bg'),
@@ -463,7 +879,7 @@
         );
         mainGround.position.y = -1;
         mainGround.receiveShadow = true;
-        scene.add(mainGround);
+        mainWorldGroup.add(mainGround);
         
         // Water body
         const waterMaterial = new THREE.MeshStandardMaterial({ 
@@ -481,7 +897,7 @@
         water.position.set(-20, 0, -20);
         water.rotation.x = -Math.PI / 2;
         water.receiveShadow = true;
-        scene.add(water);
+        mainWorldGroup.add(water);
         
         // Grass patches
         const grassMaterial = new THREE.MeshStandardMaterial({ 
@@ -503,7 +919,7 @@
             grass.rotation.z = (Math.random() - 0.5) * 0.3;
             grass.castShadow = true;
             grass.receiveShadow = true;
-            scene.add(grass);
+            mainWorldGroup.add(grass);
         }
         
         // Night-themed decorative objects
@@ -539,7 +955,7 @@
             );
             rock.castShadow = true;
             rock.receiveShadow = true;
-            scene.add(rock);
+            mainWorldGroup.add(rock);
         }
         
         // Glowing crystals
@@ -564,7 +980,7 @@
             crystal.rotation.y = Math.random() * Math.PI;
             crystal.castShadow = true;
             crystal.receiveShadow = true;
-            scene.add(crystal);
+            mainWorldGroup.add(crystal);
         }
         
         // Night trees with glowing leaves
@@ -587,7 +1003,7 @@
             );
             trunk.castShadow = true;
             trunk.receiveShadow = true;
-            scene.add(trunk);
+            mainWorldGroup.add(trunk);
             
             // Glowing tree top
             const treeTop = new THREE.Mesh(
@@ -607,7 +1023,7 @@
             );
             treeTop.castShadow = true;
             treeTop.receiveShadow = true;
-            scene.add(treeTop);
+            mainWorldGroup.add(treeTop);
         }
         
         // Glowing mushrooms
@@ -636,7 +1052,7 @@
             );
             mushroom.castShadow = true;
             mushroom.receiveShadow = true;
-            scene.add(mushroom);
+            mainWorldGroup.add(mushroom);
         }
 
         // --- LOW-POLY PERSON CHARACTER ---
@@ -723,7 +1139,7 @@
         rightEye.position.set(0.1, 1.3, 0.3);
         personGroup.add(rightEye);
         
-        scene.add(personGroup);
+        mainWorldGroup.add(personGroup);
 
         // --- FLOATING PARTICLE SYSTEM ---
         const particleCount = 30;
@@ -751,7 +1167,7 @@
             blending: THREE.AdditiveBlending,
             sizeAttenuation: true
         }));
-        scene.add(particles);
+        mainWorldGroup.add(particles);
         
 
         // --- INTERACTIVE BILLBOARDS ---
@@ -813,8 +1229,30 @@
             data.light = pointLight;
             
             group.position.copy(data.pos);
-            scene.add(group);
+            mainWorldGroup.add(group);
             portfolioItems.push({ ...data, mesh: group });
+        });
+
+        // Add main world to scene
+        scene.add(mainWorldGroup);
+
+        // --- START SCREEN TRANSITION ---
+        const startScreenOverlay = document.getElementById('start-screen-overlay');
+        const enterWorldButton = document.getElementById('enter-world-button');
+        
+        enterWorldButton.addEventListener('click', () => {
+            // Hide start screen overlay
+            startScreenOverlay.classList.add('hidden');
+            
+            // Show main world
+            mainWorldGroup.visible = true;
+            showStartScreen = false;
+            
+            // Hide start screen 3D elements
+            startScreenGroup.visible = false;
+            
+            // Start the main animation loop
+            animate();
         });
 
         // --- OPTIMIZED MOVEMENT & CONTROL VARIABLES ---
@@ -986,6 +1424,17 @@
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
+            // Only animate main world if not on start screen
+            if (showStartScreen) {
+                // Animate start screen elements
+                startParticles.rotation.y += deltaTime * 0.1;
+                startBillboardGroup.rotation.y += deltaTime * 0.05;
+                startPersonGroup.rotation.y += deltaTime * 0.2;
+                
+                renderer.render(scene, camera);
+                return;
+            }
+
             // --- WASD Character Movement & Physics ---
             const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
             
@@ -1154,7 +1603,7 @@
             loadingScreen.classList.add('hidden');
         }, 1500);
 
-        // Start the animation loop
+        // Start the animation loop (will show start screen first)
         animate();
 
         // --- PERFORMANCE MONITORING ---
