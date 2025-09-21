@@ -8,12 +8,25 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "echo 'No TypeScript check needed for static HTML'"
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "three": "^0.158.0"
+    "@dimforge/rapier3d-compat": "^0.19.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
+    "@theatre/core": "^0.7.2",
+    "@theatre/studio": "^0.7.2",
+    "@threlte/core": "^8.1.5",
+    "@threlte/extras": "^9.5.4",
+    "@threlte/flex": "^2.0.6",
+    "@threlte/rapier": "^3.1.5",
+    "@threlte/studio": "^0.1.9",
+    "@threlte/theatre": "^3.0.7",
+    "@threlte/xr": "^1.1.1",
+    "three": "^0.180.0"
   },
   "devDependencies": {
+    "svelte": "^5.39.3",
+    "svelte-check": "^4.3.1",
     "vite": "^5.4.19"
   },
   "keywords": [

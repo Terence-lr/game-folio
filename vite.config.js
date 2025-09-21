@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 
 export default defineConfig({
+  plugins: [svelte()],
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -22,5 +24,8 @@ export default defineConfig({
   preview: {
     port: 3000,
     open: true
+  },
+  optimizeDeps: {
+    include: ['three', '@threlte/core', '@threlte/extras']
   }
 })
