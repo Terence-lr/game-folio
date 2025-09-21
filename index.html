@@ -505,6 +505,8 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -515,6 +517,15 @@
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
+
+        // Font loading for 3D text
+        const fontLoader = new FontLoader();
+        let font = null;
+        
+        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (loadedFont) => {
+            font = loadedFont;
+            console.log('Font loaded successfully');
+        });
 
         // --- START SCREEN SETUP ---
         const startScreenGroup = new THREE.Group();
@@ -881,23 +892,42 @@
         mainGround.receiveShadow = true;
         mainWorldGroup.add(mainGround);
         
-        // Water body
+        // Enhanced water body with reflections
         const waterMaterial = new THREE.MeshStandardMaterial({ 
             color: 0x1e3a8a,
-            roughness: 0.1,
-            metalness: 0.8,
+            roughness: 0.0,
+            metalness: 1.0,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.9,
+            envMapIntensity: 1.0
         });
         
         const water = new THREE.Mesh(
-            new THREE.CylinderGeometry(8, 8, 0.2, 16),
+            new THREE.CylinderGeometry(8, 8, 0.2, 32),
             waterMaterial
         );
         water.position.set(-20, 0, -20);
         water.rotation.x = -Math.PI / 2;
         water.receiveShadow = true;
+        water.castShadow = true;
         mainWorldGroup.add(water);
+        
+        // Water ripples effect
+        const rippleGeometry = new THREE.RingGeometry(0.5, 8, 16);
+        const rippleMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0x87ceeb,
+            transparent: true,
+            opacity: 0.3,
+            side: THREE.DoubleSide
+        });
+        
+        for (let i = 0; i < 5; i++) {
+            const ripple = new THREE.Mesh(rippleGeometry, rippleMaterial);
+            ripple.position.set(-20, 0.1, -20);
+            ripple.rotation.x = -Math.PI / 2;
+            ripple.scale.set(0.1, 0.1, 0.1);
+            mainWorldGroup.add(ripple);
+        }
         
         // Grass patches
         const grassMaterial = new THREE.MeshStandardMaterial({ 
@@ -1139,13 +1169,74 @@
         rightEye.position.set(0.1, 1.3, 0.3);
         personGroup.add(rightEye);
         
+        // Store animation references for character
+        personGroup.userData = {
+            leftArm: leftArm,
+            rightArm: rightArm,
+            leftLeg: leftLeg,
+            rightLeg: rightLeg,
+            head: head,
+            isMoving: false,
+            walkCycle: 0
+        };
+        
         mainWorldGroup.add(personGroup);
+        
+        // Floating labels for objects
+        const floatingLabels = [];
+        
+        // Add floating labels to key objects
+        const labelObjects = [
+            { pos: new THREE.Vector3(-20, 3, -20), text: "WATER" },
+            { pos: new THREE.Vector3(0, 3, 0), text: "START" },
+            { pos: new THREE.Vector3(15, 3, 10), text: "PROJECTS" }
+        ];
+        
+        labelObjects.forEach(labelData => {
+            if (font) {
+                const labelGeometry = new TextGeometry(labelData.text, {
+                    font: font,
+                    size: 0.2,
+                    height: 0.05,
+                    curveSegments: 8,
+                    bevelEnabled: true,
+                    bevelThickness: 0.01,
+                    bevelSize: 0.005,
+                    bevelOffset: 0,
+                    bevelSegments: 3
+                });
+                
+                const labelMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x87ceeb,
+                    metalness: 0.8,
+                    roughness: 0.2,
+                    emissive: 0x87ceeb,
+                    emissiveIntensity: 0.3
+                });
+                
+                const labelMesh = new THREE.Mesh(labelGeometry, labelMaterial);
+                labelGeometry.computeBoundingBox();
+                labelMesh.position.copy(labelData.pos);
+                labelMesh.position.x -= labelGeometry.boundingBox.max.x * 0.5;
+                labelMesh.castShadow = true;
+                mainWorldGroup.add(labelMesh);
+                
+                floatingLabels.push({
+                    mesh: labelMesh,
+                    baseY: labelData.pos.y,
+                    floatSpeed: 0.02 + Math.random() * 0.01
+                });
+            }
+        });
 
-        // --- FLOATING PARTICLE SYSTEM ---
-        const particleCount = 30;
+        // --- ENHANCED PARTICLE SYSTEMS ---
+        
+        // Main floating particles
+        const particleCount = 50;
         const particleGeometry = new THREE.BufferGeometry();
         const particlePositions = new Float32Array(particleCount * 3);
         const particleSizes = new Float32Array(particleCount);
+        const particleColors = new Float32Array(particleCount * 3);
         const particleVelocities = [];
 
         for (let i = 0; i < particleCount; i++) {
@@ -1154,20 +1245,57 @@
                 Math.random() * 0.3 + 0.1, 
                 (Math.random() - 0.5) * 0.1
             ));
-            particleSizes[i] = Math.random() * 0.3 + 0.1;
+            
+            particlePositions[i * 3] = (Math.random() - 0.5) * 40;
+            particlePositions[i * 3 + 1] = Math.random() * 10 + 2;
+            particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+            particleSizes[i] = Math.random() * 0.4 + 0.1;
+            
+            // Random colors for variety
+            const color = new THREE.Color();
+            color.setHSL(0.6 + Math.random() * 0.2, 0.8, 0.6);
+            particleColors[i * 3] = color.r;
+            particleColors[i * 3 + 1] = color.g;
+            particleColors[i * 3 + 2] = color.b;
         }
         particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
         particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+        particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
         
         const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({
-            color: 0x87ceeb,
-            size: 0.4,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true,
+            vertexColors: true
+        }));
+        mainWorldGroup.add(particles);
+        
+        // Star field particles
+        const starCount = 100;
+        const starGeometry = new THREE.BufferGeometry();
+        const starPositions = new Float32Array(starCount * 3);
+        const starSizes = new Float32Array(starCount);
+        
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i * 3] = (Math.random() - 0.5) * 200;
+            starPositions[i * 3 + 1] = Math.random() * 50 + 20;
+            starPositions[i * 3 + 2] = (Math.random() - 0.5) * 200;
+            starSizes[i] = Math.random() * 0.2 + 0.05;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+        
+        const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.3,
             transparent: true,
             opacity: 0.8,
             blending: THREE.AdditiveBlending,
             sizeAttenuation: true
         }));
-        mainWorldGroup.add(particles);
+        mainWorldGroup.add(stars);
         
 
         // --- INTERACTIVE BILLBOARDS ---
@@ -1195,19 +1323,72 @@
             frame.receiveShadow = true;
             group.add(frame);
             
-            // Billboard screen
+            // Billboard screen with reflection
             const screenMaterial = new THREE.MeshStandardMaterial({ 
                 color: data.color, 
-                metalness: 0.1, 
-                roughness: 0.3,
+                metalness: 0.3, 
+                roughness: 0.1,
                 emissive: data.color,
-                emissiveIntensity: 0.1
+                emissiveIntensity: 0.2,
+                envMapIntensity: 1.0
             });
             
             const screen = new THREE.Mesh(new THREE.BoxGeometry(5.5, 3.5, 0.1), screenMaterial);
             screen.position.y = 2;
             screen.position.z = 0.1;
             group.add(screen);
+            
+            // 3D Text on billboard
+            if (font) {
+                const textGeometry = new TextGeometry(data.title, {
+                    font: font,
+                    size: 0.3,
+                    height: 0.1,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.01,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                });
+                
+                const textMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.2,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.1
+                });
+                
+                const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+                textGeometry.computeBoundingBox();
+                textMesh.position.x = -textGeometry.boundingBox.max.x * 0.5;
+                textMesh.position.y = 2.5;
+                textMesh.position.z = 0.2;
+                textMesh.castShadow = true;
+                group.add(textMesh);
+                
+                // Subtitle text
+                const subtitleGeometry = new TextGeometry(data.subtitle, {
+                    font: font,
+                    size: 0.15,
+                    height: 0.05,
+                    curveSegments: 8,
+                    bevelEnabled: true,
+                    bevelThickness: 0.01,
+                    bevelSize: 0.005,
+                    bevelOffset: 0,
+                    bevelSegments: 3
+                });
+                
+                const subtitleMesh = new THREE.Mesh(subtitleGeometry, textMaterial);
+                subtitleGeometry.computeBoundingBox();
+                subtitleMesh.position.x = -subtitleGeometry.boundingBox.max.x * 0.5;
+                subtitleMesh.position.y = 1.8;
+                subtitleMesh.position.z = 0.2;
+                subtitleMesh.castShadow = true;
+                group.add(subtitleMesh);
+            }
             
             // Billboard stand
             const standMaterial = new THREE.MeshStandardMaterial({ 
@@ -1222,11 +1403,15 @@
             stand.receiveShadow = true;
             group.add(stand);
             
-            // Glowing light
-            const pointLight = new THREE.PointLight(data.color, 3, 20);
+            // Enhanced glowing light
+            const pointLight = new THREE.PointLight(data.color, 4, 25);
             pointLight.position.y = 3;
             group.add(pointLight);
             data.light = pointLight;
+            
+            // Interactive proximity detection
+            data.isInteracting = false;
+            data.interactionDistance = 8;
             
             group.position.copy(data.pos);
             mainWorldGroup.add(group);
@@ -1470,6 +1655,38 @@
             fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
             personGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
             
+            // --- CHARACTER ANIMATION ---
+            const isMoving = targetVelocity.length() > 0.1;
+            if (personGroup.userData) {
+                personGroup.userData.isMoving = isMoving;
+                
+                if (isMoving) {
+                    personGroup.userData.walkCycle += deltaTime * 8;
+                    
+                    // Walking animation
+                    const walkOffset = Math.sin(personGroup.userData.walkCycle) * 0.3;
+                    const armSwing = Math.sin(personGroup.userData.walkCycle) * 0.5;
+                    
+                    // Leg animation
+                    personGroup.userData.leftLeg.rotation.x = walkOffset;
+                    personGroup.userData.rightLeg.rotation.x = -walkOffset;
+                    
+                    // Arm animation
+                    personGroup.userData.leftArm.rotation.x = armSwing;
+                    personGroup.userData.rightArm.rotation.x = -armSwing;
+                    
+                    // Head bobbing
+                    personGroup.userData.head.position.y = 1.2 + Math.sin(personGroup.userData.walkCycle * 2) * 0.05;
+                } else {
+                    // Reset to idle position
+                    personGroup.userData.leftLeg.rotation.x = THREE.MathUtils.lerp(personGroup.userData.leftLeg.rotation.x, 0, deltaTime * 5);
+                    personGroup.userData.rightLeg.rotation.x = THREE.MathUtils.lerp(personGroup.userData.rightLeg.rotation.x, 0, deltaTime * 5);
+                    personGroup.userData.leftArm.rotation.x = THREE.MathUtils.lerp(personGroup.userData.leftArm.rotation.x, 0, deltaTime * 5);
+                    personGroup.userData.rightArm.rotation.x = THREE.MathUtils.lerp(personGroup.userData.rightArm.rotation.x, 0, deltaTime * 5);
+                    personGroup.userData.head.position.y = THREE.MathUtils.lerp(personGroup.userData.head.position.y, 1.2, deltaTime * 5);
+                }
+            }
+            
             // Update speed indicator
             const speedIndicator = document.getElementById('speed-indicator');
             if (speedIndicator) {
@@ -1527,16 +1744,70 @@
             particles.geometry.attributes.position.needsUpdate = true;
             particles.geometry.attributes.size.needsUpdate = true;
             
+            // Animate star field
+            if (stars) {
+                stars.rotation.y += deltaTime * 0.05;
+            }
+            
+            // Animate floating labels
+            if (typeof floatingLabels !== 'undefined') {
+                floatingLabels.forEach(label => {
+                    label.mesh.position.y = label.baseY + Math.sin(elapsedTime * label.floatSpeed) * 0.3;
+                    label.mesh.rotation.y += deltaTime * 0.2;
+                });
+            }
+            
+            // Animate water ripples
+            const ripples = mainWorldGroup.children.filter(child => child.geometry && child.geometry.type === 'RingGeometry');
+            ripples.forEach((ripple, index) => {
+                ripple.scale.setScalar(0.1 + Math.sin(elapsedTime * 2 + index) * 0.05);
+                ripple.rotation.z += deltaTime * 0.5;
+            });
+            
 
-            // --- Enhanced Portfolio Item Animation ---
+            // --- Enhanced Billboard Interaction System ---
             portfolioItems.forEach(item => {
-                item.mesh.rotation.y += deltaTime * 0.15;
-                item.mesh.position.y = item.pos.y + Math.sin(elapsedTime * 0.8 + item.pos.x * 0.1) * 0.8;
-                item.mesh.rotation.x = Math.sin(elapsedTime * 0.5 + item.pos.z * 0.1) * 0.1;
+                const distance = personGroup.position.distanceTo(item.mesh.position);
                 
-                if(item.light){
-                    item.light.intensity = 2 + Math.sin(elapsedTime * 1.5) * 0.8;
-                    item.light.color.setHSL(0.6 + Math.sin(elapsedTime * 0.3) * 0.1, 0.8, 0.6);
+                if (distance < item.interactionDistance) {
+                    if (!item.isInteracting) {
+                        item.isInteracting = true;
+                        console.log(`Interacting with ${item.title}: ${item.desc}`);
+                        
+                        // Show project info
+                        projectInfo.innerHTML = `
+                            <h3>${item.title}</h3>
+                            <p>${item.desc}</p>
+                            <a href="${item.link}" target="_blank" class="project-link">View Project</a>
+                        `;
+                        projectInfo.style.display = 'block';
+                    }
+                    
+                    // Enhanced interaction effects
+                    item.mesh.rotation.y += deltaTime * 0.5;
+                    item.mesh.scale.setScalar(1.0 + Math.sin(elapsedTime * 3) * 0.1);
+                    item.mesh.position.y = item.pos.y + Math.sin(elapsedTime * 2 + item.pos.x * 0.1) * 0.5;
+                    
+                    if(item.light){
+                        item.light.intensity = 6 + Math.sin(elapsedTime * 3) * 2;
+                        item.light.color.setHSL(0.6 + Math.sin(elapsedTime * 2) * 0.1, 0.8, 0.6);
+                    }
+                } else {
+                    if (item.isInteracting) {
+                        item.isInteracting = false;
+                        projectInfo.style.display = 'none';
+                    }
+                    
+                    // Normal billboard animation
+                    item.mesh.rotation.y += deltaTime * 0.1;
+                    item.mesh.scale.lerp(new THREE.Vector3(1, 1, 1), deltaTime * 2);
+                    item.mesh.position.y = item.pos.y + Math.sin(elapsedTime * 0.8 + item.pos.x * 0.1) * 0.3;
+                    item.mesh.rotation.x = Math.sin(elapsedTime * 0.5 + item.pos.z * 0.1) * 0.05;
+                    
+                    if(item.light){
+                        item.light.intensity = 3 + Math.sin(elapsedTime * 1.5) * 0.8;
+                        item.light.color.setHSL(0.6 + Math.sin(elapsedTime * 0.3) * 0.1, 0.8, 0.6);
+                    }
                 }
             });
             
