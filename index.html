@@ -496,6 +496,10 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
         import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
         // --- SCENE SETUP ---
         const scene = new THREE.Scene();
@@ -792,6 +796,60 @@
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.4; // Increased exposure for better underwater feel
         renderer.outputColorSpace = THREE.SRGBColorSpace;
+        
+        // --- POST-PROCESSING EFFECTS (Three.js Examples Inspired) ---
+        const composer = new EffectComposer(renderer);
+        
+        // Render pass
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+        
+        // Bloom effect for magical glow
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            1.5, // strength
+            0.4, // radius
+            0.85 // threshold
+        );
+        composer.addPass(bloomPass);
+        
+        // Custom shader for enhanced night atmosphere
+        const nightShader = {
+            uniforms: {
+                'tDiffuse': { value: null },
+                'time': { value: 0.0 },
+                'intensity': { value: 0.3 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float time;
+                uniform float intensity;
+                varying vec2 vUv;
+                
+                void main() {
+                    vec4 color = texture2D(tDiffuse, vUv);
+                    
+                    // Add subtle color grading for night atmosphere
+                    color.rgb = mix(color.rgb, color.rgb * vec3(0.8, 0.9, 1.2), intensity);
+                    
+                    // Add subtle noise for film grain effect
+                    float noise = fract(sin(dot(vUv + time, vec2(12.9898, 78.233))) * 43758.5453);
+                    color.rgb += (noise - 0.5) * 0.02;
+                    
+                    gl_FragColor = color;
+                }
+            `
+        };
+        
+        const nightPass = new ShaderPass(nightShader);
+        composer.addPass(nightPass);
 
         // --- CAMERA CONTROLS ---
         const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -806,18 +864,80 @@
             controls.maxDistance = 20;
             controls.target.set(0, 0, 0); // Camera will orbit a central point
         }
+        
+        // --- INTERACTIVE RAYCASTING (Three.js Examples Inspired) ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredObject = null;
+        
+        // Mouse interaction for billboards
+        function onMouseMove(event) {
+            if (showStartScreen) return;
+            
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(portfolioItems.map(item => item.mesh));
+            
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+                if (hoveredObject !== intersected) {
+                    // Reset previous hover
+                    if (hoveredObject) {
+                        hoveredObject.scale.setScalar(1.0);
+                    }
+                    
+                    // Set new hover
+                    hoveredObject = intersected;
+                    hoveredObject.scale.setScalar(1.1);
+                    
+                    // Change cursor
+                    document.body.style.cursor = 'pointer';
+                }
+            } else {
+                if (hoveredObject) {
+                    hoveredObject.scale.setScalar(1.0);
+                    hoveredObject = null;
+                    document.body.style.cursor = 'default';
+                }
+            }
+        }
+        
+        // Click interaction for billboards
+        function onMouseClick(event) {
+            if (showStartScreen) return;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(portfolioItems.map(item => item.mesh));
+            
+            if (intersects.length > 0) {
+                const intersected = intersects[0].object;
+                const portfolioItem = portfolioItems.find(item => item.mesh === intersected);
+                if (portfolioItem) {
+                    window.open(portfolioItem.link, '_blank');
+                }
+            }
+        }
+        
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('click', onMouseClick);
 
-        // --- STARRY NIGHT LIGHTING ---
+        // --- ADVANCED STARRY NIGHT LIGHTING (Three.js Examples Inspired) ---
         // Cool ambient light for night atmosphere
         const ambientLight = new THREE.AmbientLight(0x1a1a3a, 0.4);
         scene.add(ambientLight);
         
-        // Moonlight (soft directional light)
+        // Hemisphere light for natural sky/ground lighting
+        const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x2d5016, 0.3);
+        scene.add(hemisphereLight);
+        
+        // Enhanced moonlight (soft directional light)
         const moonLight = new THREE.DirectionalLight(0x87ceeb, 0.8);
         moonLight.position.set(5, 30, 10);
         moonLight.castShadow = true;
-        moonLight.shadow.mapSize.width = 2048;
-        moonLight.shadow.mapSize.height = 2048;
+        moonLight.shadow.mapSize.width = 4096;
+        moonLight.shadow.mapSize.height = 4096;
         moonLight.shadow.camera.near = 0.5;
         moonLight.shadow.camera.far = 100;
         moonLight.shadow.camera.left = -30;
@@ -827,18 +947,35 @@
         moonLight.shadow.bias = -0.0001;
         scene.add(moonLight);
         
-        // Starry accent lights
-        const starLight1 = new THREE.PointLight(0x87ceeb, 1.2, 25);
-        starLight1.position.set(-15, 8, -15);
-        scene.add(starLight1);
+        // Dynamic star lights with color variation
+        const starLights = [];
+        const starColors = [0x87ceeb, 0x98d8e8, 0xa8e6cf, 0xff6b9d, 0x4ecdc4];
+        const starPositions = [
+            [-15, 8, -15], [15, 6, 15], [0, 10, -20], 
+            [20, 6, 0], [-10, 15, 10], [5, 8, -25]
+        ];
         
-        const starLight2 = new THREE.PointLight(0x98d8e8, 1.0, 20);
-        starLight2.position.set(15, 6, 15);
-        scene.add(starLight2);
+        starPositions.forEach((pos, index) => {
+            const starLight = new THREE.PointLight(
+                starColors[index % starColors.length], 
+                1.2 + Math.random() * 0.8, 
+                25 + Math.random() * 15
+            );
+            starLight.position.set(pos[0], pos[1], pos[2]);
+            starLight.castShadow = true;
+            starLight.shadow.mapSize.width = 1024;
+            starLight.shadow.mapSize.height = 1024;
+            scene.add(starLight);
+            starLights.push(starLight);
+        });
         
-        const starLight3 = new THREE.PointLight(0xa8e6cf, 0.8, 18);
-        starLight3.position.set(0, 10, -20);
-        scene.add(starLight3);
+        // Volumetric lighting (god rays effect)
+        const volumetricLight = new THREE.SpotLight(0x87ceeb, 2.0, 50, Math.PI / 6, 0.3, 1);
+        volumetricLight.position.set(0, 25, 0);
+        volumetricLight.target.position.set(0, 0, 0);
+        volumetricLight.castShadow = true;
+        scene.add(volumetricLight);
+        scene.add(volumetricLight.target);
 
         // --- GOD RAYS (VOLUMETRIC LIGHTING EFFECT) ---
         const godraysEffect = new THREE.Group();
@@ -1620,7 +1757,10 @@
                 if (startBillboardGroup) startBillboardGroup.rotation.y += deltaTime * 0.05;
                 if (startPersonGroup) startPersonGroup.rotation.y += deltaTime * 0.2;
                 
-                renderer.render(scene, camera);
+                // Update shader uniforms
+                nightPass.uniforms.time.value = elapsedTime;
+                
+                composer.render();
                 return;
             }
 
@@ -1819,13 +1959,21 @@
             godraysEffect.rotation.y += deltaTime * 0.03;
             godraysEffect.rotation.x = Math.sin(elapsedTime * 0.1) * 0.1;
             
-            // --- Dynamic Lighting Animation ---
-            causticLight.position.x = Math.sin(elapsedTime * 0.5) * 10;
-            causticLight.position.z = Math.cos(elapsedTime * 0.3) * 8;
-            causticLight.intensity = 1.5 + Math.sin(elapsedTime * 2) * 0.5;
+            // --- ADVANCED LIGHTING ANIMATION (Three.js Examples Inspired) ---
+            // Animate star lights with color variation
+            starLights.forEach((light, index) => {
+                light.intensity = 1.2 + Math.sin(elapsedTime * (0.5 + index * 0.2)) * 0.3;
+                const hue = (0.6 + Math.sin(elapsedTime * 0.3 + index) * 0.1) % 1.0;
+                light.color.setHSL(hue, 0.8, 0.6);
+            });
             
-            bioLight.intensity = 0.8 + Math.sin(elapsedTime * 1.2) * 0.4;
-            bioLight2.intensity = 0.8 + Math.sin(elapsedTime * 1.2 + Math.PI) * 0.4;
+            // Animate volumetric light
+            volumetricLight.intensity = 2.0 + Math.sin(elapsedTime * 0.4) * 0.5;
+            volumetricLight.position.x = Math.sin(elapsedTime * 0.2) * 5;
+            volumetricLight.position.z = Math.cos(elapsedTime * 0.2) * 5;
+            
+            // Animate hemisphere light
+            hemisphereLight.intensity = 0.3 + Math.sin(elapsedTime * 0.1) * 0.1;
 
             // --- Camera Follow Logic ---
             if (!isMobile) {
@@ -1860,7 +2008,11 @@
                 portfolioPanel.classList.remove('visible');
             }
             
-            renderer.render(scene, camera);
+            // Update shader uniforms
+            nightPass.uniforms.time.value = elapsedTime;
+            
+            // Render with post-processing
+            composer.render();
         }
 
         // --- WINDOW RESIZE HANDLER ---
@@ -1868,6 +2020,7 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
         });
 
         // --- LOADING SCREEN ---
