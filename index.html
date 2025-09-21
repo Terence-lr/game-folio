@@ -248,6 +248,20 @@
             }
         }
 
+        /* Speed indicator */
+        .speed-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
         /* Performance optimizations */
         * {
             -webkit-tap-highlight-color: transparent;
@@ -279,6 +293,10 @@
     <canvas id="bg"></canvas>
 
     <div class="ui-overlay">
+        
+        <div class="speed-indicator" id="speed-indicator">
+            Speed: 0 | Boost: OFF
+        </div>
         
         <div id="mobile-controls">
             <div id="joystick-container">
@@ -772,24 +790,20 @@
             portfolioItems.push({ ...data, mesh: group });
         });
 
-        // --- ENHANCED MOVEMENT & CONTROL VARIABLES ---
+        // --- OPTIMIZED MOVEMENT & CONTROL VARIABLES ---
         const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
         const fishVelocity = new THREE.Vector3();
-        const fishAngularVelocity = new THREE.Vector3();
         let isBoosting = false;
-        const baseSpeed = 8.0;
-        const boostMultiplier = 2.8;
-        const momentumDamping = 3.5;
-        const angularDamping = 2.0;
+        const baseSpeed = 10.0;
+        const boostMultiplier = 2.5;
+        const momentumDamping = 6.0; // More responsive
         const cameraOffset = new THREE.Vector3(0, 4, 12);
-        const cameraSmoothing = 0.1;
         
-        // Enhanced movement physics
+        // Simplified movement physics for better responsiveness
         let currentSpeed = 0;
-        let targetSpeed = 0;
-        const maxSpeed = 15.0;
-        const acceleration = 8.0;
-        const deceleration = 12.0;
+        const maxSpeed = 20.0;
+        const acceleration = 15.0;
+        const deceleration = 20.0;
         
         let lastTouchX = null;
         let lastTouchY = null;
@@ -934,44 +948,47 @@
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
-            // --- Enhanced Fish Movement & Physics ---
+            // --- OPTIMIZED Fish Movement & Physics ---
             const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
-            targetSpeed = Math.abs(moveState.forward) * baseSpeed * speedMultiplier;
+            const targetSpeed = Math.abs(moveState.forward) * baseSpeed * speedMultiplier;
             
-            // Smooth speed transitions
+            // Smooth speed transitions for better responsiveness
             if (targetSpeed > currentSpeed) {
                 currentSpeed = Math.min(currentSpeed + acceleration * deltaTime, targetSpeed);
             } else {
                 currentSpeed = Math.max(currentSpeed - deceleration * deltaTime, targetSpeed);
             }
             
-            // Enhanced rotation with angular velocity
-            const turnSpeed = 0.08 * speedMultiplier;
-            const pitchSpeed = 0.04 * speedMultiplier;
+            // Simplified and more responsive rotation
+            const turnSpeed = 0.1 * speedMultiplier; // Increased for better responsiveness
+            const pitchSpeed = 0.05 * speedMultiplier;
             
-            fishAngularVelocity.y = moveState.turn * turnSpeed;
-            fishAngularVelocity.x = -moveState.up * pitchSpeed;
-            
-            fishGroup.rotation.y += fishAngularVelocity.y * deltaTime;
-            fishGroup.rotation.x += fishAngularVelocity.x * deltaTime;
-            
-            // Apply angular damping
-            fishAngularVelocity.multiplyScalar(1 - angularDamping * deltaTime);
+            fishGroup.rotation.y += moveState.turn * turnSpeed;
+            fishGroup.rotation.x -= moveState.up * pitchSpeed;
 
             // Constrain fish's vertical rotation to avoid flipping
-            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 3, Math.PI / 3);
+            fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
 
-            // Enhanced movement with momentum
+            // Optimized movement calculation
             const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(fishGroup.quaternion);
             const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(fishGroup.quaternion);
-            const upVector = new THREE.Vector3(0, 1, 0);
 
             const targetVelocity = forwardVector.multiplyScalar(currentSpeed * moveState.forward);
-            targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe * 0.7));
-            targetVelocity.add(upVector.multiplyScalar(moveState.up * currentSpeed * 0.6));
+            targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe));
+            
+            // Add vertical movement
+            targetVelocity.y += moveState.up * currentSpeed * 0.7; // Increased vertical responsiveness
 
             fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
             fishGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
+            
+            // Update speed indicator
+            const speedIndicator = document.getElementById('speed-indicator');
+            if (speedIndicator) {
+                const speed = Math.round(fishVelocity.length() * 10) / 10;
+                const boostStatus = isBoosting ? 'ON' : 'OFF';
+                speedIndicator.textContent = `Speed: ${speed} | Boost: ${boostStatus}`;
+            }
 
             // Enhanced fin and tail animation
             const movementIntensity = Math.min(fishVelocity.length() / 5, 1);
