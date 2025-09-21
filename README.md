@@ -1,143 +1,185 @@
-# Gamefolio - Underwater Portfolio Experience
+# GameFolio - 3D Portfolio Experience
 
-An immersive 3D underwater portfolio experience built with Three.js. Navigate through an underwater world to explore Terence Richardson's portfolio projects and skills.
+An immersive 3D portfolio experience built with Three.js, showcasing projects in an interactive underwater world.
 
-## 🐠 Features
+## 🚀 Current Status: MVP Visual-First Version
 
-- **Interactive 3D Environment**: Swim through an underwater world with realistic physics and lighting
-- **Portfolio Integration**: Discover projects by swimming to different underwater landmarks
-- **Cross-Platform Controls**: 
-  - Desktop: WASD/Arrow keys for movement, R/F for depth, Space for boost, mouse drag for camera
-  - Mobile: Virtual joystick, touch controls, and gesture-based camera movement
-- **Performance Optimized**: Built for smooth 60fps on both desktop and mobile devices
-- **Responsive Design**: Adapts to different screen sizes and orientations
+This project has evolved through multiple iterations and is currently in an **MVP (Minimum Viable Product)** state that prioritizes **visibility and visual appeal** over complex features.
 
-## 🚀 Quick Start
+### 🎯 What's Working Now
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
+- **Pure Three.js Implementation**: Simple, reliable 3D scene without complex dependencies
+- **Guaranteed Visibility**: All objects are visible and properly lit
+- **Interactive Portfolio Items**: Click on colored cubes to interact with portfolio projects
+- **Smooth Controls**: Mouse look + WASD movement with OrbitControls
+- **Visual Appeal**: Starry night theme with atmospheric lighting and fog
+- **Responsive Design**: Works on desktop and mobile devices
 
-### Installation
+## 🏗️ Project Evolution
 
-```bash
-# Clone the repository
-git clone https://github.com/Terence-lr/game-folio.git
-cd game-folio
+### Phase 1: Initial Three.js Implementation
+- Started as a React/Three.js application
+- Migrated to pure HTML/JavaScript for better performance
+- Implemented underwater fish portfolio with swimming animations
 
-# Install dependencies
-npm install
+### Phase 2: Visual Enhancements
+- Added Bruno Simon-inspired low-poly 3D world
+- Transformed from underwater to starry night theme
+- Implemented interactive billboards and 3D text
+- Added post-processing effects (bloom, color grading, film grain)
 
-# Start development server
-npm run dev
-```
+### Phase 3: Advanced Features (Threlte Migration)
+- Migrated to Svelte + Threlte architecture
+- Integrated Rapier physics engine
+- Added Theatre.js animations
+- Implemented VR/AR support with WebXR
+- Created custom GLSL shaders
 
-### Build for Production
-
-```bash
-# Build the project
-npm run build
-
-# Preview the build
-npm run preview
-```
-
-## 🌐 Deployment
-
-This project is optimized for deployment on Vercel:
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Deploy with zero configuration
-
-The project includes:
-- `vercel.json` configuration for optimal performance
-- Proper caching headers for static assets
-- Security headers for production deployment
+### Phase 4: MVP Simplification
+- **Current State**: Simplified to pure Three.js for maximum compatibility
+- Removed complex dependencies that caused deployment issues
+- Focused on core visual experience with guaranteed functionality
 
 ## 🎮 Controls
 
-### Desktop
-- **Movement**: WASD or Arrow Keys
-- **Depth**: R (up) / F (down)
-- **Boost**: Spacebar
-- **Camera**: Mouse drag to rotate
+- **W/A/S/D**: Move around the world
+- **Mouse**: Look around (OrbitControls)
+- **Click**: Interact with portfolio items
+- **Scroll**: Zoom in/out
 
-### Mobile
-- **Movement**: Virtual joystick
-- **Depth**: Up/Down buttons
-- **Boost**: Boost button
-- **Camera**: Touch and drag to rotate
+## 🛠️ Technical Stack
 
-## 🛠️ Technology Stack
+### Current MVP Stack
+- **Three.js**: 3D graphics and rendering
+- **Vanilla JavaScript**: No framework dependencies
+- **HTML5/CSS3**: Modern web standards
+- **OrbitControls**: Camera controls
 
-- **Three.js**: 3D graphics and WebGL rendering
-- **Vite**: Build tool and development server
-- **TypeScript**: Type safety and better development experience
-- **Vercel**: Hosting and deployment platform
+### Previous Advanced Stack (Archived)
+- **Svelte**: Reactive JavaScript framework
+- **Threlte**: Svelte components for Three.js
+- **Rapier**: Physics engine
+- **Theatre.js**: Animation system
+- **WebXR**: VR/AR support
+- **GLSL Shaders**: Custom visual effects
 
 ## 📁 Project Structure
 
 ```
 game-folio/
-├── index.html          # Main HTML file with embedded Three.js code
-├── favicon.svg         # Site favicon
-├── manifest.json       # PWA manifest
-├── robots.txt          # SEO robots file
-├── sitemap.xml         # SEO sitemap
-├── vercel.json         # Vercel deployment configuration
-├── vite.config.ts      # Vite build configuration
-├── package.json        # Dependencies and scripts
-└── README.md          # This file
+├── index.html              # Main application (MVP version)
+├── package.json            # Dependencies and scripts
+├── vercel.json            # Vercel deployment configuration
+├── README.md              # This file
+├── src/                   # Advanced Svelte components (archived)
+│   ├── App.svelte
+│   ├── components/
+│   │   ├── Scene.svelte
+│   │   ├── Environment.svelte
+│   │   ├── Character.svelte
+│   │   ├── PortfolioBillboards.svelte
+│   │   ├── UI.svelte
+│   │   ├── Animations.svelte
+│   │   ├── XRSupport.svelte
+│   │   └── Shaders.svelte
+│   └── main.js
+└── client/                # Legacy React components (archived)
+    ├── src/
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── data/
+    │   └── lib/
+    └── public/
 ```
 
-## 🎨 Customization
+## 🚀 Deployment
 
-The portfolio items and their positions can be customized in the `portfolioItemData` array within `index.html`:
+### Vercel (Current)
+The project is optimized for Vercel deployment with:
+- Static site generation
+- Optimized asset loading
+- Security headers
+- Performance optimizations
 
-```javascript
-const portfolioItemData = [
-  { 
-    type: 'crystal', 
-    pos: new THREE.Vector3(-20, -5, 0), 
-    color: 0x00ffff, 
-    title: "Your Project", 
-    desc: "Project description", 
-    link: "https://your-project-link.com" 
-  },
-  // Add more projects...
-];
+### Local Development
+```bash
+# Serve the MVP version
+python -m http.server 8000
+# or
+npx serve .
+
+# For advanced Svelte version (archived)
+npm install
+npm run dev
 ```
 
-## 🐛 Troubleshooting
+## 🎨 Visual Features
 
-### WebGL Issues
-If the 3D environment doesn't load:
-1. Ensure your browser supports WebGL
-2. Check browser console for error messages
-3. Try updating your graphics drivers
+### Current MVP Features
+- **Starry Night Theme**: Deep blue gradient background with atmospheric fog
+- **Interactive Portfolio Cubes**: Three colored cubes representing different project categories
+- **Decorative Objects**: Random colored spheres for visual interest
+- **Dynamic Lighting**: Ambient + directional lighting with shadows
+- **Smooth Animations**: Rotating and floating portfolio items
 
-### Performance Issues
-- On mobile devices, the experience is optimized for performance
-- Reduce particle count or disable shadows if needed
-- Check browser developer tools for performance metrics
+### Advanced Features (Archived)
+- **3D Text Billboards**: TextGeometry with custom fonts
+- **Particle Systems**: Bubbles, stars, and environmental effects
+- **Post-Processing**: Bloom, color grading, film grain effects
+- **Physics Simulation**: Realistic object interactions
+- **VR/AR Support**: WebXR integration
+- **Custom Shaders**: GLSL effects for enhanced visuals
 
-## 📄 License
+## 🔧 Development History
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Key Commits
+- **Initial Setup**: React/Three.js underwater portfolio
+- **Vercel Optimization**: Static site deployment configuration
+- **Visual Enhancements**: Bruno Simon-inspired low-poly world
+- **Starry Night Theme**: Natural environment with billboards
+- **Advanced Features**: Physics, animations, XR, shaders
+- **Threlte Migration**: Svelte-based architecture
+- **MVP Simplification**: Pure Three.js for maximum compatibility
 
-## 👨‍💻 Author
+### Challenges Overcome
+- **Visibility Issues**: Ensured all 3D objects are properly visible
+- **Deployment Problems**: Simplified architecture for reliable deployment
+- **Performance Optimization**: Balanced visual quality with performance
+- **Cross-Platform Compatibility**: Works on desktop and mobile
 
-**Terence Richardson**
-- GitHub: [@Terence-lr](https://github.com/Terence-lr)
-- Portfolio: [gamefolio.vercel.app](https://gamefolio.vercel.app)
+## 🎯 Future Roadmap
 
-## 🙏 Acknowledgments
+### Phase 1: MVP Enhancement
+- [ ] Add more interactive portfolio items
+- [ ] Implement smooth character movement
+- [ ] Add sound effects and background music
+- [ ] Create portfolio detail modals
 
-- Three.js community for the amazing 3D library
-- Vercel for seamless deployment platform
-- All contributors and testers
+### Phase 2: Visual Polish
+- [ ] Add particle effects
+- [ ] Implement better lighting
+- [ ] Create custom 3D models
+- [ ] Add post-processing effects
+
+### Phase 3: Advanced Features
+- [ ] Re-integrate physics engine
+- [ ] Add VR/AR support
+- [ ] Implement custom shaders
+- [ ] Create animation system
+
+## 📝 License
+
+MIT License - feel free to use this project as inspiration for your own portfolio!
+
+## 🤝 Contributing
+
+This is a personal portfolio project, but suggestions and improvements are welcome!
+
+## 📞 Contact
+
+- **GitHub**: [Terence-lr](https://github.com/Terence-lr)
+- **Portfolio**: [Live Demo](https://game-folio.vercel.app)
 
 ---
 
-Made with ❤️ and Three.js
+*Built with ❤️ and Three.js*

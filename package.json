@@ -1,47 +1,33 @@
 {
   "name": "gamefolio",
-  "version": "1.0.0",
-  "description": "An immersive 3D underwater portfolio experience built with Three.js",
+  "version": "2.0.0",
+  "description": "An immersive 3D portfolio experience - MVP Visual-First Version",
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
-  },
-  "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.19.0",
-    "@sveltejs/vite-plugin-svelte": "^4.0.4",
-    "@theatre/core": "^0.7.2",
-    "@theatre/studio": "^0.7.2",
-    "@threlte/core": "^8.1.5",
-    "@threlte/extras": "^9.5.4",
-    "@threlte/flex": "^2.0.6",
-    "@threlte/rapier": "^3.1.5",
-    "@threlte/studio": "^0.1.9",
-    "@threlte/theatre": "^3.0.7",
-    "@threlte/xr": "^1.1.1",
-    "three": "^0.180.0"
-  },
-  "devDependencies": {
-    "svelte": "^5.39.3",
-    "svelte-check": "^4.3.1",
-    "vite": "^5.4.19"
+    "dev": "python -m http.server 8000",
+    "serve": "npx serve .",
+    "build": "echo 'No build step needed for MVP - pure HTML/JS'",
+    "deploy": "npx vercel --prod --yes"
   },
   "keywords": [
     "portfolio",
     "3d",
     "threejs",
-    "underwater",
     "interactive",
-    "game",
-    "webgl"
+    "webgl",
+    "mvp"
   ],
-  "author": "Terence Richardson",
+  "author": "Terence-lr",
   "repository": {
     "type": "git",
     "url": "https://github.com/Terence-lr/game-folio"
   },
-  "homepage": "https://gamefolio.vercel.app"
+  "homepage": "https://game-folio.vercel.app",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
