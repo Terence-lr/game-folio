@@ -1,8 +1,9 @@
 <script>
   import { Mesh, Group, CylinderGeometry, SphereGeometry } from '@threlte/core';
   import { MeshStandardMaterial } from 'three';
+  // Physics temporarily disabled for compatibility
   import { onMount, onDestroy } from 'svelte';
-  import { useFrame } from '@threlte/core';
+  // Animation temporarily disabled for compatibility
   
   // Materials
   const personMaterial = new MeshStandardMaterial({ 
@@ -61,27 +62,31 @@
     window.removeEventListener('keyup', handleKeyUp);
   });
   
-  // Animation loop
-  useFrame(({ delta }) => {
-    if (characterGroup) {
-      const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
-      const speed = baseSpeed * speedMultiplier;
-      
-      // Calculate movement direction
-      const forward = new THREE.Vector3(0, 0, -moveState.forward);
-      const strafe = new THREE.Vector3(moveState.strafe, 0, 0);
-      const up = new THREE.Vector3(0, moveState.up, 0);
-      
-      // Apply movement
-      const movement = forward.add(strafe).add(up).multiplyScalar(speed * delta);
-      characterGroup.position.add(movement);
-      
-      // Character rotation based on movement
-      if (moveState.forward !== 0 || moveState.strafe !== 0) {
-        const angle = Math.atan2(moveState.strafe, -moveState.forward);
-        characterGroup.rotation.y = angle;
+  // Animation loop - simplified for now
+  onMount(() => {
+    const animate = () => {
+      if (characterGroup) {
+        const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
+        const speed = baseSpeed * speedMultiplier * 0.016; // ~60fps
+        
+        // Calculate movement direction
+        const forward = new THREE.Vector3(0, 0, -moveState.forward);
+        const strafe = new THREE.Vector3(moveState.strafe, 0, 0);
+        const up = new THREE.Vector3(0, moveState.up, 0);
+        
+        // Apply movement
+        const movement = forward.add(strafe).add(up).multiplyScalar(speed);
+        characterGroup.position.add(movement);
+        
+        // Character rotation based on movement
+        if (moveState.forward !== 0 || moveState.strafe !== 0) {
+          const angle = Math.atan2(moveState.strafe, -moveState.forward);
+          characterGroup.rotation.y = angle;
+        }
       }
-    }
+      requestAnimationFrame(animate);
+    };
+    animate();
   });
 </script>
 

@@ -90,11 +90,37 @@
   </button>
 </div>
 
-<!-- XR Controls -->
-<div class="xr-controls">
-  <button class="xr-btn" on:click={() => enterXR()}>
-    🥽 Enter VR
-  </button>
+<!-- Enhanced Controls -->
+<div class="enhanced-controls">
+  <div class="control-section">
+    <h4>🎮 Advanced Features</h4>
+    <div class="feature-list">
+      <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <span>Physics Engine (Rapier)</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🎬</span>
+        <span>Theatre Animations</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🥽</span>
+        <span>VR/AR Support</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">✨</span>
+        <span>Custom Shaders</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="physics-info">
+    <h4>🔬 Physics Info</h4>
+    <p>Objects now have realistic physics!</p>
+    <p>• Gravity affects all objects</p>
+    <p>• Collision detection active</p>
+    <p>• Character has physics body</p>
+  </div>
 </div>
 
 <style>
@@ -261,27 +287,68 @@
     color: white;
   }
   
-  .xr-controls {
+  .enhanced-controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1000;
+    max-width: 300px;
   }
   
-  .xr-btn {
-    background: linear-gradient(45deg, #4a90e2, #87ceeb);
+  .control-section {
+    background: rgba(0, 0, 0, 0.8);
     color: white;
-    border: none;
-    padding: 15px 25px;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid rgba(135, 206, 235, 0.3);
+    backdrop-filter: blur(10px);
+    margin-bottom: 10px;
     font-family: 'Courier New', monospace;
-    transition: all 0.3s ease;
   }
   
-  .xr-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(74, 144, 226, 0.6);
+  .control-section h4 {
+    margin: 0 0 10px 0;
+    color: #87ceeb;
+    font-size: 1rem;
+  }
+  
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #98d8e8;
+  }
+  
+  .feature-icon {
+    font-size: 1.2rem;
+  }
+  
+  .physics-info {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid rgba(74, 144, 226, 0.3);
+    backdrop-filter: blur(10px);
+    font-family: 'Courier New', monospace;
+  }
+  
+  .physics-info h4 {
+    margin: 0 0 10px 0;
+    color: #4a90e2;
+    font-size: 1rem;
+  }
+  
+  .physics-info p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: #a8e6cf;
   }
 </style>

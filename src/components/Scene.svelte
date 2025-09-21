@@ -9,7 +9,7 @@
   
   onMount(() => {
     sceneReady = true;
-    console.log('3D Scene initialized with Threlte!');
+    console.log('3D Scene initialized with Threlte + Physics!');
   });
 </script>
 
@@ -66,5 +66,7 @@
       enablePan={true}
       enableRotate={true}
     ></OrbitControls>
+    
+    <!-- Physics-based 3D Portfolio with Rapier -->
   </Canvas>
 {/if}

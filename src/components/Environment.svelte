@@ -1,6 +1,7 @@
 <script>
   import { Mesh, BoxGeometry, PlaneGeometry, CylinderGeometry, SphereGeometry } from '@threlte/core';
   import { MeshStandardMaterial } from 'three';
+  // Physics temporarily disabled for compatibility
   import { onMount } from 'svelte';
   
   // Materials

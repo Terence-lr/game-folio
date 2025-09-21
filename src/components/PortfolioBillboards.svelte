@@ -1,8 +1,9 @@
 <script>
   import { Mesh, Group, BoxGeometry, CylinderGeometry } from '@threlte/core';
   import { MeshStandardMaterial, TextGeometry, FontLoader } from 'three';
+  // Physics temporarily disabled for compatibility
   import { onMount } from 'svelte';
-  import { useFrame } from '@threlte/core';
+  // Animation temporarily disabled for compatibility
   
   // Portfolio data
   const portfolioData = [
@@ -65,22 +66,26 @@
     });
   });
   
-  // Animation loop
-  useFrame(({ delta, camera }) => {
-    billboards.forEach((billboard, index) => {
-      if (billboard.group) {
-        // Rotate billboard
-        billboard.group.rotation.y += delta * 0.2;
-        
-        // Float up and down
-        billboard.group.position.y = portfolioData[index].position[1] + Math.sin(Date.now() * 0.001 + index) * 0.3;
-        
-        // Pulsing light
-        if (billboard.light) {
-          billboard.light.intensity = 4 + Math.sin(Date.now() * 0.003 + index) * 2;
+  // Animation loop - simplified for now
+  onMount(() => {
+    const animate = () => {
+      billboards.forEach((billboard, index) => {
+        if (billboard.group) {
+          // Rotate billboard
+          billboard.group.rotation.y += 0.016 * 0.2;
+          
+          // Float up and down
+          billboard.group.position.y = portfolioData[index].position[1] + Math.sin(Date.now() * 0.001 + index) * 0.3;
+          
+          // Pulsing light
+          if (billboard.light) {
+            billboard.light.intensity = 4 + Math.sin(Date.now() * 0.003 + index) * 2;
+          }
         }
-      }
-    });
+      });
+      requestAnimationFrame(animate);
+    };
+    animate();
   });
   
   const handleBillboardClick = (link) => {
