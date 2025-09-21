@@ -311,7 +311,7 @@
         
         <div id="instructions-panel" class="info-panel visible">
             <h2>Welcome to Gamefolio</h2>
-            <p><strong>Desktop:</strong> Arrow/WASD to move, <strong>R/F</strong> for depth, Spacebar to boost. Use <strong>mouse drag</strong> to rotate the camera.</p>
+            <p><strong>Desktop:</strong> <strong>W</strong> forward, <strong>S</strong> backward (turns around), <strong>A/D</strong> left/right, <strong>Q/E</strong> up/down, <strong>Space</strong> boost. Use <strong>mouse drag</strong> to rotate camera.</p>
             <p><strong>Mobile:</strong> Use joystick, side buttons for depth, and boost button. <strong>Touch & drag</strong> to rotate camera.</p>
             <button id="start-button">Dive In</button>
         </div>
@@ -812,21 +812,32 @@
 
         // --- DESKTOP CONTROLS ---
         document.addEventListener('keydown', (e) => {
-            if (e.code === 'KeyW' || e.code === 'ArrowUp') moveState.forward = 1;
-            if (e.code === 'KeyS' || e.code === 'ArrowDown') moveState.forward = -1;
-            if (e.code === 'KeyA' || e.code === 'ArrowLeft') moveState.turn = 1;
-            if (e.code === 'KeyD' || e.code === 'ArrowRight') moveState.turn = -1;
-            if (e.code === 'KeyR') moveState.up = 1;
-            if (e.code === 'KeyF') moveState.up = -1;
+            // W = Forward acceleration
+            if (e.code === 'KeyW') moveState.forward = 1;
+            // S = Backward acceleration (will turn fish around first)
+            if (e.code === 'KeyS') moveState.forward = -1;
+            // A = Left acceleration
+            if (e.code === 'KeyA') moveState.strafe = -1;
+            // D = Right acceleration  
+            if (e.code === 'KeyD') moveState.strafe = 1;
+            // Q = Up movement
+            if (e.code === 'KeyQ') moveState.up = 1;
+            // E = Down movement
+            if (e.code === 'KeyE') moveState.up = -1;
+            // Space = Boost
             if (e.code === 'Space') {
                 e.preventDefault();
                 isBoosting = true;
             }
         });
         document.addEventListener('keyup', (e) => {
-            if (['KeyW', 'ArrowUp', 'KeyS', 'ArrowDown'].includes(e.code)) moveState.forward = 0;
-            if (['KeyA', 'ArrowLeft', 'KeyD', 'ArrowRight'].includes(e.code)) moveState.turn = 0;
-            if (['KeyR', 'KeyF'].includes(e.code)) moveState.up = 0;
+            // W/S = Forward/Backward
+            if (['KeyW', 'KeyS'].includes(e.code)) moveState.forward = 0;
+            // A/D = Left/Right strafe
+            if (['KeyA', 'KeyD'].includes(e.code)) moveState.strafe = 0;
+            // Q/E = Up/Down
+            if (['KeyQ', 'KeyE'].includes(e.code)) moveState.up = 0;
+            // Space = Boost
             if (e.code === 'Space') isBoosting = false;
         });
         
@@ -948,8 +959,16 @@
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
-            // --- OPTIMIZED Fish Movement & Physics ---
+            // --- WASD Fish Movement & Physics ---
             const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
+            
+            // Handle backward movement with turning
+            if (moveState.forward < 0) {
+                // Turn fish around when going backward
+                const turnSpeed = 0.15 * speedMultiplier;
+                fishGroup.rotation.y += turnSpeed;
+            }
+            
             const targetSpeed = Math.abs(moveState.forward) * baseSpeed * speedMultiplier;
             
             // Smooth speed transitions for better responsiveness
@@ -959,25 +978,25 @@
                 currentSpeed = Math.max(currentSpeed - deceleration * deltaTime, targetSpeed);
             }
             
-            // Simplified and more responsive rotation
-            const turnSpeed = 0.1 * speedMultiplier; // Increased for better responsiveness
+            // Vertical rotation for Q/E controls
             const pitchSpeed = 0.05 * speedMultiplier;
-            
-            fishGroup.rotation.y += moveState.turn * turnSpeed;
             fishGroup.rotation.x -= moveState.up * pitchSpeed;
 
             // Constrain fish's vertical rotation to avoid flipping
             fishGroup.rotation.x = THREE.MathUtils.clamp(fishGroup.rotation.x, -Math.PI / 4, Math.PI / 4);
 
-            // Optimized movement calculation
+            // WASD movement calculation
             const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(fishGroup.quaternion);
             const sideVector = new THREE.Vector3(1, 0, 0).applyQuaternion(fishGroup.quaternion);
 
+            // Forward/backward movement (W/S)
             const targetVelocity = forwardVector.multiplyScalar(currentSpeed * moveState.forward);
+            
+            // Left/right strafe movement (A/D)
             targetVelocity.add(sideVector.multiplyScalar(currentSpeed * moveState.strafe));
             
-            // Add vertical movement
-            targetVelocity.y += moveState.up * currentSpeed * 0.7; // Increased vertical responsiveness
+            // Vertical movement (Q/E)
+            targetVelocity.y += moveState.up * currentSpeed * 0.7;
 
             fishVelocity.lerp(targetVelocity, deltaTime * momentumDamping);
             fishGroup.position.add(fishVelocity.clone().multiplyScalar(deltaTime));
