@@ -109,149 +109,161 @@
     </div>
 
     <script type="module">
-        import * as THREE from 'https://unpkg.com/three@0.180.0/build/three.module.js';
-        import { OrbitControls } from 'https://unpkg.com/three@0.180.0/examples/jsm/controls/OrbitControls.js';
+        async function initThreeJS() {
+            try {
+                // Import Three.js modules
+                const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
+                const { OrbitControls } = await import('https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js');
+                
+                // Scene setup
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x0a0a2e);
+                scene.fog = new THREE.Fog(0x0a0a2e, 10, 100);
 
-        // Scene setup
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a2e);
-        scene.fog = new THREE.Fog(0x0a0a2e, 10, 100);
+                // Camera
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 5, 15);
 
-        // Camera
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 15);
+                // Renderer
+                const renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.outputEncoding = THREE.sRGBEncoding;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.0;
+                document.getElementById('container').appendChild(renderer.domElement);
 
-        // Renderer
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.outputEncoding = THREE.sRGBEncoding;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
-        document.getElementById('container').appendChild(renderer.domElement);
+                // Controls
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enableZoom = true;
+                controls.enablePan = true;
 
-        // Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.enableZoom = true;
-        controls.enablePan = true;
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                scene.add(ambientLight);
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-        scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0x87ceeb, 1.0);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                directionalLight.shadow.camera.near = 0.5;
+                directionalLight.shadow.camera.far = 50;
+                scene.add(directionalLight);
 
-        const directionalLight = new THREE.DirectionalLight(0x87ceeb, 1.0);
-        directionalLight.position.set(10, 10, 5);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        directionalLight.shadow.camera.near = 0.5;
-        directionalLight.shadow.camera.far = 50;
-        scene.add(directionalLight);
+                // Ground
+                const groundGeometry = new THREE.PlaneGeometry(50, 50);
+                const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
+                const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+                ground.rotation.x = -Math.PI / 2;
+                ground.receiveShadow = true;
+                scene.add(ground);
 
-        // Ground
-        const groundGeometry = new THREE.PlaneGeometry(50, 50);
-        const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
+                // Character (simple cube for now)
+                const characterGeometry = new THREE.BoxGeometry(1, 2, 1);
+                const characterMaterial = new THREE.MeshLambertMaterial({ color: 0x6b7280 });
+                const character = new THREE.Mesh(characterGeometry, characterMaterial);
+                character.position.set(0, 1, 0);
+                character.castShadow = true;
+                scene.add(character);
 
-        // Character (simple cube for now)
-        const characterGeometry = new THREE.BoxGeometry(1, 2, 1);
-        const characterMaterial = new THREE.MeshLambertMaterial({ color: 0x6b7280 });
-        const character = new THREE.Mesh(characterGeometry, characterMaterial);
-        character.position.set(0, 1, 0);
-        character.castShadow = true;
-        scene.add(character);
+                // Portfolio items (colored cubes)
+                const portfolioItems = [
+                    { position: [-10, 1, -10], color: 0x87ceeb, title: "Web Dev" },
+                    { position: [0, 1, -15], color: 0xa8e6cf, title: "Game Dev" },
+                    { position: [10, 1, -10], color: 0x4a90e2, title: "AI/ML" }
+                ];
 
-        // Portfolio items (colored cubes)
-        const portfolioItems = [
-            { position: [-10, 1, -10], color: 0x87ceeb, title: "Web Dev" },
-            { position: [0, 1, -15], color: 0xa8e6cf, title: "Game Dev" },
-            { position: [10, 1, -10], color: 0x4a90e2, title: "AI/ML" }
-        ];
+                const portfolioMeshes = [];
+                portfolioItems.forEach((item, index) => {
+                    const geometry = new THREE.BoxGeometry(2, 2, 2);
+                    const material = new THREE.MeshLambertMaterial({ color: item.color });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(item.position[0], item.position[1], item.position[2]);
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+                    mesh.userData = { title: item.title, index: index };
+                    scene.add(mesh);
+                    portfolioMeshes.push(mesh);
+                });
 
-        const portfolioMeshes = [];
-        portfolioItems.forEach((item, index) => {
-            const geometry = new THREE.BoxGeometry(2, 2, 2);
-            const material = new THREE.MeshLambertMaterial({ color: item.color });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(item.position[0], item.position[1], item.position[2]);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            mesh.userData = { title: item.title, index: index };
-            scene.add(mesh);
-            portfolioMeshes.push(mesh);
-        });
+                // Decorative objects
+                for (let i = 0; i < 20; i++) {
+                    const geometry = new THREE.SphereGeometry(0.5, 8, 6);
+                    const material = new THREE.MeshLambertMaterial({ 
+                        color: new THREE.Color().setHSL(Math.random(), 0.7, 0.6)
+                    });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.set(
+                        (Math.random() - 0.5) * 40,
+                        Math.random() * 3 + 0.5,
+                        (Math.random() - 0.5) * 40
+                    );
+                    mesh.castShadow = true;
+                    scene.add(mesh);
+                }
 
-        // Decorative objects
-        for (let i = 0; i < 20; i++) {
-            const geometry = new THREE.SphereGeometry(0.5, 8, 6);
-            const material = new THREE.MeshLambertMaterial({ 
-                color: new THREE.Color().setHSL(Math.random(), 0.7, 0.6)
-            });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(
-                (Math.random() - 0.5) * 40,
-                Math.random() * 3 + 0.5,
-                (Math.random() - 0.5) * 40
-            );
-            mesh.castShadow = true;
-            scene.add(mesh);
-        }
+                // Raycaster for interactions
+                const raycaster = new THREE.Raycaster();
+                const mouse = new THREE.Vector2();
 
-        // Raycaster for interactions
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+                // Mouse interaction
+                function onMouseClick(event) {
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        // Mouse interaction
-        function onMouseClick(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(portfolioMeshes);
 
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(portfolioMeshes);
+                    if (intersects.length > 0) {
+                        const clickedObject = intersects[0].object;
+                        alert(`Clicked on: ${clickedObject.userData.title}`);
+                    }
+                }
 
-            if (intersects.length > 0) {
-                const clickedObject = intersects[0].object;
-                alert(`Clicked on: ${clickedObject.userData.title}`);
+                window.addEventListener('click', onMouseClick);
+
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+
+                    // Rotate portfolio items
+                    portfolioMeshes.forEach((mesh, index) => {
+                        mesh.rotation.y += 0.01;
+                        mesh.position.y = portfolioItems[index].position[1] + Math.sin(Date.now() * 0.001 + index) * 0.3;
+                    });
+
+                    // Update controls
+                    controls.update();
+
+                    // Render
+                    renderer.render(scene, camera);
+                }
+
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                // Hide loading screen and start animation
+                document.getElementById('loading').style.display = 'none';
+                animate();
+                
+                console.log('3D World loaded successfully!');
+                
+            } catch (error) {
+                console.error('Failed to load 3D world:', error);
+                document.getElementById('loading').innerHTML = 'Failed to load 3D world. Please refresh the page.';
             }
         }
 
-        window.addEventListener('click', onMouseClick);
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Rotate portfolio items
-            portfolioMeshes.forEach((mesh, index) => {
-                mesh.rotation.y += 0.01;
-                mesh.position.y = portfolioItems[index].position[1] + Math.sin(Date.now() * 0.001 + index) * 0.3;
-            });
-
-            // Update controls
-            controls.update();
-
-            // Render
-            renderer.render(scene, camera);
-        }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Hide loading screen and start animation
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-            animate();
-        }, 1000);
+        // Start the initialization
+        initThreeJS();
     </script>
 </body>
 </html>
