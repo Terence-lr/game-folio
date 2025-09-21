@@ -541,20 +541,33 @@
         // --- ENHANCED FISH CHARACTER ---
         const fishGroup = new THREE.Group();
         
-        // Main body with gradient material
+        // Main body with fish-like shape
         const fishBody = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.6, 2.0, 4, 16),
+            new THREE.SphereGeometry(0.8, 12, 8),
             new THREE.MeshStandardMaterial({ 
                 color: 0xff6b35,
-                metalness: 0.4,
-                roughness: 0.3,
-                emissive: 0x331100,
-                emissiveIntensity: 0.1
+                metalness: 0.2,
+                roughness: 0.4
             })
         );
+        fishBody.scale.set(1.2, 0.8, 1.0);
         fishBody.rotation.z = Math.PI / 2;
         fishBody.castShadow = true;
         fishGroup.add(fishBody);
+
+        // Fish head
+        const fishHead = new THREE.Mesh(
+            new THREE.SphereGeometry(0.6, 12, 8),
+            new THREE.MeshStandardMaterial({ 
+                color: 0xff7b45,
+                metalness: 0.2,
+                roughness: 0.4
+            })
+        );
+        fishHead.position.x = 1.0;
+        fishHead.scale.set(1.0, 0.9, 0.8);
+        fishHead.castShadow = true;
+        fishGroup.add(fishHead);
 
         // Enhanced tail with better geometry
         const fishTail = new THREE.Mesh(
@@ -710,10 +723,20 @@
             const material = new THREE.MeshStandardMaterial({ color: data.color, metalness: 0.2, roughness: 0.8 });
 
             if (data.type === 'crystal') {
-                const crystal = new THREE.Mesh(new THREE.IcosahedronGeometry(2.5, 0), material);
-                crystal.castShadow = true;
-                crystal.receiveShadow = true;
-                group.add(crystal);
+                // Simple fish shape for portfolio
+                const fishBody = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 6), material);
+                fishBody.scale.set(1.5, 0.8, 1.0);
+                fishBody.castShadow = true;
+                fishBody.receiveShadow = true;
+                group.add(fishBody);
+                
+                const fishTail = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.5, 6), material);
+                fishTail.position.x = -1.5;
+                fishTail.rotation.z = Math.PI / 2;
+                fishTail.castShadow = true;
+                fishTail.receiveShadow = true;
+                group.add(fishTail);
+                
                 const pointLight = new THREE.PointLight(data.color, 2, 20);
                 group.add(pointLight);
                 data.light = pointLight;
