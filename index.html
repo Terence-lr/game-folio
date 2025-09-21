@@ -262,193 +262,8 @@
             z-index: 100;
         }
 
-        /* Start Screen Overlay */
-        .start-screen-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0a0a2e 0%, #1a3a5c 50%, #2d5016 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease-out;
-            pointer-events: auto;
-            /* 8-bit inspired pixelated effect */
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
+        /* Start screen CSS removed - going straight to 3D world */
 
-        .start-screen-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .start-screen-content {
-            text-align: center;
-            color: white;
-            max-width: 90vw;
-            width: 600px;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            border: 2px solid rgba(135, 206, 235, 0.3);
-            backdrop-filter: blur(10px);
-            margin: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            max-height: 90vh;
-        }
-
-        .start-title {
-            font-size: clamp(2rem, 8vw, 3.5rem);
-            font-weight: bold;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #87ceeb, #98d8e8, #a8e6cf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 20px rgba(135, 206, 235, 0.5);
-            /* 8-bit inspired styling */
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-            border: 3px solid #87ceeb;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            box-shadow: 0 0 30px rgba(135, 206, 235, 0.3);
-            letter-spacing: 2px;
-        }
-
-        .start-subtitle {
-            font-size: 1.2rem;
-            color: #98d8e8;
-            margin-bottom: 30px;
-        }
-
-        .start-character-info,
-        .start-controls-guide,
-        .start-billboard-info {
-            margin: 25px 0;
-            padding: 20px;
-            background: rgba(26, 58, 92, 0.3);
-            border-radius: 15px;
-            border: 1px solid rgba(135, 206, 235, 0.2);
-        }
-
-        .start-character-info h3,
-        .start-controls-guide h3,
-        .start-billboard-info h3 {
-            color: #87ceeb;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
-        }
-        
-        /* 8-bit Pixel Character */
-        .pixel-character {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 15px 0;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-        
-        .pixel-head {
-            width: 20px;
-            height: 20px;
-            background: #6b7280;
-            border: 2px solid #4a4a4a;
-            margin-bottom: 2px;
-        }
-        
-        .pixel-body {
-            width: 24px;
-            height: 30px;
-            background: #6b7280;
-            border: 2px solid #4a4a4a;
-            margin-bottom: 2px;
-        }
-        
-        .pixel-arms {
-            width: 40px;
-            height: 8px;
-            background: #6b7280;
-            border: 2px solid #4a4a4a;
-            margin-bottom: 2px;
-        }
-        
-        .pixel-legs {
-            width: 32px;
-            height: 20px;
-            background: #4a4a4a;
-            border: 2px solid #2a2a2a;
-        }
-
-        .controls-visual {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .control-row {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            border: 1px solid rgba(135, 206, 235, 0.3);
-        }
-
-        .control-key {
-            background: linear-gradient(45deg, #4a90e2, #87ceeb);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 0px; /* 8-bit square corners */
-            font-weight: bold;
-            font-size: 0.9rem;
-            min-width: 50px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(74, 144, 226, 0.3);
-            /* 8-bit inspired styling */
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-            border: 2px solid #87ceeb;
-            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
-        }
-
-        .enter-world-btn {
-            background: linear-gradient(45deg, #4a90e2, #87ceeb);
-            color: white;
-            border: 3px solid #87ceeb;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 0px; /* 8-bit square corners */
-            cursor: pointer;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.4);
-            pointer-events: auto;
-            z-index: 1001;
-            position: relative;
-            /* 8-bit inspired styling */
-            font-family: 'Courier New', monospace;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
-        }
-
-        .enter-world-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(74, 144, 226, 0.6);
-            background: linear-gradient(45deg, #87ceeb, #98d8e8);
-        }
 
         /* Performance optimizations */
         * {
@@ -493,64 +308,7 @@
         </div>
         
         
-        <div id="start-screen-overlay" class="start-screen-overlay visible">
-            <div class="start-screen-content">
-                <h1 class="start-title">GAMEFOLIO</h1>
-                <p class="start-subtitle">Interactive 3D Portfolio Experience</p>
-                
-                <div class="start-character-info">
-                    <h3>Your Character</h3>
-                    <div class="pixel-character">
-                        <div class="pixel-head"></div>
-                        <div class="pixel-body"></div>
-                        <div class="pixel-arms"></div>
-                        <div class="pixel-legs"></div>
-                    </div>
-                    <p>You are the explorer in this starry night world. Use the controls below to navigate through my portfolio projects.</p>
-                </div>
-                
-                <div class="start-controls-guide">
-                    <h3>Controls</h3>
-                    <div class="controls-visual">
-                        <div class="control-row">
-                            <div class="control-key">W</div>
-                            <span>Forward</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">S</div>
-                            <span>Backward</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">A</div>
-                            <span>Left</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">D</div>
-                            <span>Right</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">Q</div>
-                            <span>Up</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">E</div>
-                            <span>Down</span>
-                        </div>
-                        <div class="control-row">
-                            <div class="control-key">SPACE</div>
-                            <span>Boost</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="start-billboard-info">
-                    <h3>Interactive Billboards</h3>
-                    <p>Explore the glowing billboards to discover my projects. Each one represents a different portfolio piece with detailed information.</p>
-                </div>
-                
-                <button id="enter-world-button" class="enter-world-btn">Enter World</button>
-            </div>
-        </div>
+        <!-- Start screen removed - going straight to 3D world -->
         
         <div id="portfolio-info-panel" class="info-panel">
             <h2 id="portfolio-title">Portfolio Section</h2>
@@ -585,7 +343,7 @@
         scene.fog = new THREE.FogExp2(0x0a0a2e, 0.005); // Deep blue night fog
         
         // Start screen flag
-        let showStartScreen = true;
+        let showStartScreen = false;
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 5, 15);
@@ -608,23 +366,8 @@
             console.log('Font loaded successfully');
         });
 
-        // --- START SCREEN SETUP ---
-        const startScreenGroup = new THREE.Group();
+        // --- START SCREEN REMOVED - GOING STRAIGHT TO 3D WORLD ---
         
-        // Start screen ground
-        const startGroundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x1a3a5c,
-            roughness: 0.8,
-            metalness: 0.1
-        });
-        
-        const startGround = new THREE.Mesh(
-            new THREE.BoxGeometry(30, 1, 30),
-            startGroundMaterial
-        );
-        startGround.position.y = -1;
-        startGround.receiveShadow = true;
-        startScreenGroup.add(startGround);
         
         // Start screen grass patches
         const startGrassMaterial = new THREE.MeshStandardMaterial({ 
@@ -857,9 +600,9 @@
         
         scene.add(startScreenGroup);
 
-        // --- MAIN WORLD GROUP (initially hidden) ---
+        // --- MAIN WORLD GROUP (immediately visible) ---
         const mainWorldGroup = new THREE.Group();
-        mainWorldGroup.visible = false;
+        mainWorldGroup.visible = true;
 
         const renderer = new THREE.WebGLRenderer({
             canvas: document.querySelector('#bg'),
@@ -1817,178 +1560,8 @@
         // Add main world to scene
         scene.add(mainWorldGroup);
 
-        // --- START SCREEN TRANSITION (8-bit inspired) ---
-        const startScreenOverlay = document.getElementById('start-screen-overlay');
-        const enterWorldButton = document.getElementById('enter-world-button');
-        
-        // Debug: Check if elements exist
-        console.log('Start screen overlay:', startScreenOverlay);
-        console.log('Enter world button:', enterWorldButton);
-        
-        // Add loading animation to start screen
-        function addLoadingAnimation() {
-            const loadingText = document.createElement('div');
-            loadingText.id = 'loading-text';
-            loadingText.style.cssText = `
-                position: absolute;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                color: #87ceeb;
-                font-family: 'Courier New', monospace;
-                font-size: 1rem;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                animation: blink 1s infinite;
-            `;
-            loadingText.textContent = 'Loading...';
-            startScreenOverlay.appendChild(loadingText);
-            
-            // Add CSS animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes blink {
-                    0%, 50% { opacity: 1; }
-                    51%, 100% { opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Remove loading text after 2 seconds
-            setTimeout(() => {
-                if (loadingText.parentNode) {
-                    loadingText.parentNode.removeChild(loadingText);
-                }
-            }, 2000);
-        }
-        
-        // Start loading animation
-        addLoadingAnimation();
-        
-        if (enterWorldButton) {
-            // Add button press animation
-            enterWorldButton.addEventListener('mousedown', () => {
-                enterWorldButton.style.transform = 'scale(0.95)';
-            });
-            
-            enterWorldButton.addEventListener('mouseup', () => {
-                enterWorldButton.style.transform = 'scale(1)';
-            });
-            
-            enterWorldButton.addEventListener('click', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                console.log('Enter World button clicked!');
-                
-                // Add button feedback
-                enterWorldButton.textContent = 'ENTERING...';
-                enterWorldButton.style.background = 'linear-gradient(45deg, #ff6b35, #ff8c42)';
-                
-                // Immediate transition - no delay
-                // Hide start screen overlay
-                startScreenOverlay.classList.add('hidden');
-                console.log('Start screen overlay hidden');
-                
-                // Show main world
-                mainWorldGroup.visible = true;
-                showStartScreen = false;
-                console.log('Main world shown, showStartScreen set to false');
-                
-                // Hide start screen 3D elements
-                startScreenGroup.visible = false;
-                console.log('Start screen 3D elements hidden');
-                
-                // Ensure camera is positioned correctly for main world
-                camera.position.set(0, 4, 12);
-                camera.lookAt(0, 0, 0);
-                console.log('Camera positioned for main world');
-                
-                // Start the main animation loop
-                animate();
-                console.log('Animation loop started');
-            });
-            
-            // Also add touch event for mobile
-            enterWorldButton.addEventListener('touchend', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                console.log('Enter World button touched!');
-                
-                // Add button feedback
-                enterWorldButton.textContent = 'ENTERING...';
-                enterWorldButton.style.background = 'linear-gradient(45deg, #ff6b35, #ff8c42)';
-                
-                // Immediate transition - no delay
-                // Hide start screen overlay
-                startScreenOverlay.classList.add('hidden');
-                console.log('Start screen overlay hidden');
-                
-                // Show main world
-                mainWorldGroup.visible = true;
-                showStartScreen = false;
-                console.log('Main world shown, showStartScreen set to false');
-                
-                // Hide start screen 3D elements
-                startScreenGroup.visible = false;
-                console.log('Start screen 3D elements hidden');
-                
-                // Ensure camera is positioned correctly for main world
-                camera.position.set(0, 4, 12);
-                camera.lookAt(0, 0, 0);
-                console.log('Camera positioned for main world');
-                
-                // Start the main animation loop
-                animate();
-                console.log('Animation loop started');
-            });
-        } else {
-            console.error('Enter World button not found!');
-        }
-        
-        // Fallback: Add a simple test button if the main one doesn't work
-        setTimeout(() => {
-            if (!enterWorldButton || !enterWorldButton.addEventListener) {
-                console.log('Creating fallback button...');
-                const fallbackButton = document.createElement('button');
-                fallbackButton.textContent = 'ENTER WORLD (FALLBACK)';
-                fallbackButton.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    z-index: 9999;
-                    background: red;
-                    color: white;
-                    padding: 10px;
-                    border: none;
-                    cursor: pointer;
-                `;
-                fallbackButton.onclick = () => {
-                    console.log('Fallback button clicked!');
-                    startScreenOverlay.classList.add('hidden');
-                    mainWorldGroup.visible = true;
-                    showStartScreen = false;
-                    startScreenGroup.visible = false;
-                    camera.position.set(0, 4, 12);
-                    camera.lookAt(0, 0, 0);
-                    animate();
-                };
-                document.body.appendChild(fallbackButton);
-            }
-        }, 2000);
-        
-        // Add keyboard shortcut to enter world (Enter key)
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' && showStartScreen) {
-                console.log('Enter key pressed to enter world!');
-                startScreenOverlay.classList.add('hidden');
-                mainWorldGroup.visible = true;
-                showStartScreen = false;
-                startScreenGroup.visible = false;
-                camera.position.set(0, 4, 12);
-                camera.lookAt(0, 0, 0);
-                animate();
-            }
-        });
+        // --- START SCREEN REMOVED - GOING STRAIGHT TO 3D WORLD ---
+        console.log('Starting directly in 3D world - no start screen');
 
         // --- OPTIMIZED MOVEMENT & CONTROL VARIABLES ---
         const moveState = { forward: 0, strafe: 0, up: 0, turn: 0 };
@@ -2157,19 +1730,7 @@
             const deltaTime = clock.getDelta();
             const elapsedTime = clock.getElapsedTime();
 
-            // Only animate main world if not on start screen
-            if (showStartScreen) {
-                // Animate start screen elements
-                if (startParticles) startParticles.rotation.y += deltaTime * 0.1;
-                if (startBillboardGroup) startBillboardGroup.rotation.y += deltaTime * 0.05;
-                if (startPersonGroup) startPersonGroup.rotation.y += deltaTime * 0.2;
-                
-                // Update shader uniforms
-                nightPass.uniforms.time.value = elapsedTime;
-                
-                composer.render();
-                return;
-            }
+            // No start screen - animate main world directly
 
             // --- WASD Character Movement & Physics ---
             const speedMultiplier = isBoosting ? boostMultiplier : 1.0;
@@ -2466,6 +2027,7 @@
         }, 1500);
 
         // Start the animation loop (will show start screen first)
+        // Start animation loop immediately - no start screen
         animate();
 
         // --- PERFORMANCE MONITORING ---
